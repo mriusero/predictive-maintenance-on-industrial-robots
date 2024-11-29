@@ -5,12 +5,19 @@ import glob
 from datetime import datetime
 import gc
 
-def load_data():
 
-    failure_data_path = './data/input/training_data/failure_data.csv'           #Failure data
+def load_data():
+    """
+    Loads multiple datasets from various CSV files and merges them into a unified dataset.
+
+    :return: str: A message indicating that the data has been successfully generated.
+    """
+    # Load failure data
+    failure_data_path = './data/input/training_data/failure_data.csv'
     failure_data = pd.read_csv(failure_data_path)
 
-    degradation_data_path = './data/input/training_data/degradation_data'       #Degradation data
+    # Load degradation data
+    degradation_data_path = './data/input/training_data/degradation_data'
     degradation_dfs = []
     for filename in os.listdir(degradation_data_path):
         if filename.endswith('.csv'):
@@ -21,7 +28,8 @@ def load_data():
             degradation_dfs.append(df)
     degradation_data = pd.concat(degradation_dfs, ignore_index=False)
 
-    pseudo_testing_data_path = './data/input/training_data/pseudo_testing_data'     #Pseudo testing
+    # Load pseudo testing data
+    pseudo_testing_data_path = './data/input/training_data/pseudo_testing_data'
     pseudo_testing_dfs = []
     for filename in os.listdir(pseudo_testing_data_path):
         if filename.endswith('.csv'):
@@ -32,7 +40,8 @@ def load_data():
             pseudo_testing_dfs.append(df)
     pseudo_testing_data = pd.concat(pseudo_testing_dfs, ignore_index=False)
 
-    pseudo_testing_data_with_truth_path = './data/input/training_data/pseudo_testing_data_with_truth'  # Pseudo testing with truth
+    # Load pseudo testing data with truth
+    pseudo_testing_data_with_truth_path = './data/input/training_data/pseudo_testing_data_with_truth'
     pseudo_testing_data_with_truth_dfs = []
     for filename in os.listdir(pseudo_testing_data_with_truth_path):
         if filename.endswith('.csv'):
@@ -43,12 +52,14 @@ def load_data():
                 df = pd.read_csv(file_path)
                 df['item_id'] = item_id
                 pseudo_testing_data_with_truth_dfs.append(df)
-    pseudo_testing_data_with_truth = pd.concat(pseudo_testing_dfs, ignore_index=False)
+    pseudo_testing_data_with_truth = pd.concat(pseudo_testing_data_with_truth_dfs, ignore_index=False)
 
-    solution_data_path = './data/input/training_data/pseudo_testing_data_with_truth/Solution.csv'   # Solution
+    # Load solution data
+    solution_data_path = './data/input/training_data/pseudo_testing_data_with_truth/Solution.csv'
     solution_data = pd.read_csv(solution_data_path)
 
-    testing_data_path = './data/input/testing_data/phase1'  # Testing data
+    # Load testing data
+    testing_data_path = './data/input/testing_data/phase1'
     testing_dfs = []
     for filename in os.listdir(testing_data_path):
         if filename.endswith('.csv'):
@@ -59,6 +70,7 @@ def load_data():
             testing_dfs.append(df)
     testing_data = pd.concat(testing_dfs, ignore_index=False)
 
+    # Consolidate all datasets into a dictionary
     data = {
         'failure_data': failure_data,
         'degradation_data': degradation_data,
@@ -70,40 +82,56 @@ def load_data():
 
     return merge_data(data)
 
-def merge_data(training_data):
 
+def merge_data(training_data):
+    """
+    Merges various datasets into a final dataset and saves them to CSV files.
+
+    :param training_data: dict: Dictionary containing the datasets to merge.
+    :return: str: A message indicating the successful generation of new data.
+    """
+    # Merge degradation and failure data
     df1 = pd.merge(training_data['degradation_data'], training_data['failure_data'], on='item_id', how='left')
-    df1['label'] = (df1['rul (months)'] <= 6).astype(int)
+    df1['label'] = (df1['rul (months)'] <= 6).astype(int)  # Label items with remaining useful life <= 6 months
     df1 = df1.sort_values(by=["item_id", "time (months)"], ascending=[True, True])
 
-
+    # Prepare pseudo testing data
     df2 = training_data['pseudo_testing_data'].copy()
     df2['item_id'] = df2['item_id'].astype(int)
 
+    # Merge pseudo testing data with truth and solution data
     df3 = training_data['pseudo_testing_data_with_truth'].copy()
-
     training_data['solution_data']['item_id'] = training_data['solution_data']['item_id'].str.extract(r'(\d+)').astype(int)
     df3 = pd.merge(df3, training_data['solution_data'], on='item_id', how='left')
     df3['item_id'] = df3['item_id'].astype(int)
 
+    # Prepare testing data
     df4 = training_data['testing_data'].copy()
     df4['item_id'] = df4['item_id'].astype(int)
 
-
+    # Save merged data to CSV
     df1.to_csv('./data/output/training/training_data.csv', index=False)
     df2.to_csv('./data/output/pseudo_testing/pseudo_testing_data.csv', index=False)
     df3.to_csv('./data/output/pseudo_testing/pseudo_testing_data_with_truth.csv', index=False)
     df4.to_csv('./data/output/testing/testing_data_phase1.csv', index=False)
 
-    update_message = 'New data generated successfully !'
+    # Generate success message
+    update_message = 'New data generated successfully!'
     timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
+    # Clean up and clear terminal
     gc.collect()
     os.system('clear')
 
     return f"{update_message} [{timestamp}]"
 
+
 def dataframing_data():
+    """
+    Reads and loads all processed datasets into DataFrames.
+
+    :return: dict: A dictionary containing all the loaded DataFrames.
+    """
     paths = {
         'train': './data/output/training/training_data.csv',
         'pseudo_test': './data/output/pseudo_testing/pseudo_testing_data.csv',
@@ -120,18 +148,27 @@ def dataframing_data():
 
 
 def load_failures():
+    """
+    Loads failure modes for all items from the training dataset.
 
+    :return: pd.DataFrame: DataFrame containing the item_id and its corresponding failure mode.
+    :raises ValueError: If 'item_id' or 'Failure mode' columns are missing from the data.
+    """
     df = pd.read_csv('./data/output/training/training_data.csv')
     if 'item_id' not in df.columns or 'Failure mode' not in df.columns:
-        raise ValueError("Les colonnes 'item_id' ou 'Failure mode' sont manquantes dans le DataFrame.")
+        raise ValueError("The columns 'item_id' or 'Failure mode' are missing in the DataFrame.")
     df = df.groupby('item_id')['Failure mode'].first().reset_index()
     failures_df = df.rename(columns={'Failure mode': 'Failure mode'})
     return failures_df
 
 
-
-
 def detect_outliers(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Detects outliers in a DataFrame based on the IQR method.
+
+    :param df: pd.DataFrame: The DataFrame to analyze.
+    :return: pd.DataFrame: DataFrame containing the detected outliers.
+    """
     outliers_list = []
     for column in df.select_dtypes(include=['number']).columns:
         Q1 = df[column].quantile(0.25)
@@ -150,8 +187,13 @@ def detect_outliers(df: pd.DataFrame) -> pd.DataFrame:
     else:
         return pd.DataFrame(columns=df.columns.tolist() + ['outlier_column', 'outlier_type'])
 
-def combine_submissions_for_scenario(folder_path):
 
+def combine_submissions_for_scenario(folder_path):
+    """
+    Combines multiple CSV submissions for a given scenario into a single file.
+
+    :param folder_path: str: The folder containing CSV files to combine.
+    """
     file_paths = glob.glob(os.path.join(folder_path, '*.csv'))
     dfs = [pd.read_csv(file) for file in file_paths]
     combined_df = pd.concat(dfs)
@@ -162,65 +204,55 @@ def combine_submissions_for_scenario(folder_path):
 
 def display_variable_types(df):
     """
-    Affiche dans Streamlit les types de variables d'un DataFrame donné.
+    Displays the variable types of a given DataFrame in a user-friendly format.
 
-    Paramètres:
-    df (pd.DataFrame): Le DataFrame à analyser.
+    :param df: pd.DataFrame: The DataFrame to analyze.
+    :return: pd.DataFrame: DataFrame with variable names and their types.
     """
-
     def identify_variable_type(series):
         """
-        Identifie le type d'une variable dans une série pandas.
+        Identifies the type of a variable in a pandas Series.
         """
-        # Vérifier si la série contient des valeurs numériques
         if pd.api.types.is_numeric_dtype(series):
             unique_values = series.nunique()
             total_values = len(series)
-
-            # Critère pour une variable continue
             if pd.api.types.is_float_dtype(series) or unique_values > 20 and unique_values / total_values > 0.05:
-                return 'continue'
-            # Critère pour une variable discrète
+                return 'continuous'
             elif pd.api.types.is_integer_dtype(series) or unique_values <= 20:
                 return 'discrete'
         else:
-            # Critère pour une variable catégorielle
             unique_values = series.nunique()
             total_values = len(series)
-            if unique_values / total_values < 0.5:  # Ajuster le seuil selon vos besoins
+            if unique_values / total_values < 0.5:
                 return 'categorical'
-
-        # Si aucun des critères n'est satisfait
         return 'unknown'
 
-    # Identification des types de variables pour chaque colonne du DataFrame
     results = {'Variable': [], 'Type': []}
-
     for col in df.columns:
         var_type = identify_variable_type(df[col])
         results['Variable'].append(col)
         results['Type'].append(var_type)
 
-    # Convertir les résultats en DataFrame pour un affichage propre
     return pd.DataFrame(results)
 
 
 def compare_dataframes(df1, df2):
     """
-    Compare deux DataFrames et affiche les différences de colonnes et de valeurs.
+    Compares two DataFrames and displays the differences in columns and values.
+
+    :param df1: pd.DataFrame: First DataFrame to compare.
+    :param df2: pd.DataFrame: Second DataFrame to compare.
     """
-    # Comparaison des colonnes
     cols_diff = set(df1.columns).symmetric_difference(set(df2.columns))
     if cols_diff:
-        print("Colonnes différentes :")
+        print("Different columns:")
         print(cols_diff)
     else:
-        print("Les deux DataFrames ont les mêmes colonnes.")
+        print("Both DataFrames have the same columns.")
 
-    # Comparaison des valeurs
     diff = df1.compare(df2, keep_shape=True, keep_equal=True)
     if diff.empty:
-        print("Les deux DataFrames sont identiques au niveau des valeurs.")
+        print("Both DataFrames are identical in terms of values.")
     else:
-        print("Différences de valeurs :")
+        print("Differences in values:")
         print(diff)
