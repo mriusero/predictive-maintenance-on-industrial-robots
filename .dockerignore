@@ -1,10 +1,37 @@
-# MacOS
-.DS_Store
+# Ignore environment-specific configuration files
+.venv
+*.env
 
-# PyCharm
+# Ignore version control files and folders
+.git
+.gitignore
+
+# Ignore compiled Python files
+**/__pycache__/
+**/*.pyc
+**/*.pyo
+
+# Outputs and generated files
+#/data/input/training_data/pseudo_testing_data
+#/data/input/training_data/pseudo_testing_data_with_truth
+#/data/output/pseudo_testing
+#/data/output/testing/
+#/data/output/submission/
+
+# Ignore cache folders
+**/.mypy_cache/
+**/.pytest_cache/
+**/.cache/
+
+# Ignore logs and other temporary files
+*.log
+*.tmp
+
+# Ignore IDE/editor-specific files
+.vscode/
 .idea/
-__pycache__/
+*.swp
 
-
-# Jupyter Notebook
-*.ipynb
+# Ignore system-generated files
+.DS_Store
+Thumbs.db

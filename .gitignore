@@ -1,17 +1,47 @@
+# Python environment
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.pkl
 
-# Mac OS
+# Caches and temporary files
+.mypy_cache/
+.pytest_cache/
+.cache/
+*.log
+*.tmp
+
+# Virtual environments
+venv/
+.env
+*.env
+
+# IDE-specific configurations
+.vscode/
+.idea/
+
+# Configuration files or secrets
+config.json
+config.yaml
+secrets.yaml
+
+# System-specific files
 .DS_Store
+Thumbs.db
 
-# Venv
+# Virtual environment (alternative naming)
 .venv
 .idea
-*.pyc
+*__pycache__/
 
-# Hide Random data generation
+# Generated notebooks and documents
+*.ipynb_checkpoints
+*.ipynb
+
+# Outputs and generated files
 /data/input/training_data/pseudo_testing_data
 /data/input/training_data/pseudo_testing_data_with_truth
 /data/output/pseudo_testing
 /data/output/testing/
 /data/output/submission/
-
-*.ipynb
