@@ -1,0 +1,31 @@
+# Streamlit Configuration File
+
+# Theme settings: Customize the appearance of the app.
+[theme]
+base = "dark"                           # Base theme (dark or light).
+primaryColor = "#00d2ba"                # Primary color for the interface.
+backgroundColor = "#313234"             # Main background color.
+secondaryBackgroundColor = "#0d1b25"    # Secondary background color (e.g., sidebar).
+#textColor = "#262730"                  # Text color (currently commented out).
+#font = "sans serif"                    # Font used in the app (default: sans serif).
+#default_background = "#0E1117"         # Default background color (commented out).
+
+# Browser settings: How Streamlit interacts with the browser.
+[browser]
+serverAddress = "localhost"             # Address where the server will run (default: "localhost").
+gatherUsageStats = false                # Disable usage statistics collection (privacy setting).
+serverPort = 8501                       # Port for the browser to connect (default: 8501).
+
+
+# Server settings: Configure the Streamlit server behavior.
+[server]
+headless = true                         # Run in headless mode (no browser auto-launch).
+runOnSave = true                        # Automatically run the script when saved.
+address = "localhost"                   # Bind server to all interfaces (useful for Docker/cloud).
+port = 8501                             # Port on which the server will run (default: 8501).
+baseUrlPath = ""
+enableCORS = true                       # Disable CORS (Cross-Origin Resource Sharing) for security.
+enableXsrfProtection = true             # Enable XSRF protection for added security (default: true).
+enableWebsocketCompression = false      # Disable WebSocket compression (multi-user environments).
+#maxUploadSize = 200                    # Maximum file upload size in MB (default: 200 MB).
+#browserServerTimeout = 300             # Timeout for browser connection retries in seconds.
