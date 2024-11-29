@@ -97,7 +97,7 @@ class DataVisualizer:
                 }
             fig = px.scatter(
                 df, x=x_col, y=y_col, color=color_col,
-                title=f'Nuage de points pour {x_col} vs {y_col}',
+                title=f'Scatter plot for {x_col} vs {y_col}',
                 color_continuous_scale=color_scale,
                 color_discrete_map=color_discrete_map
             )
@@ -125,6 +125,7 @@ class DataVisualizer:
         fig = px.histogram(
             df, x=x_col, y=y_col, color=color_col,
             color_discrete_map=color_map,
+            title=f'Distribution of {y_col} per {x_col}',
             marginal="box",
             hover_data=df.columns
         )

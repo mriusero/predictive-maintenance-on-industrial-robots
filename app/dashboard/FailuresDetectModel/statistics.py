@@ -151,7 +151,7 @@ def run_statistical_test(df, test_type, *args):
 
     if test_type == 'normality':         # Test de normalité pour vérifier si la distribution des données suit une loi normale.
         result, p_value = tester.test_normality(args[0])
-        return st.write(f"Normality Test on {args[0]} - p-value: {p_value}, Result: {'Normal' if result else 'Not Normal'}")
+        return st.write(f"--> Normality Test - `{args[0]}` - p-value: `{p_value}` - Result: {'`Normal`' if result else '`Not Normal`'}")
 
     elif test_type == 'ttest':          # Test T (Student) pour comparer les moyennes de deux échantillons indépendants ou appariés.
         result, p_value = tester.test_t_test(args[0], args[1])

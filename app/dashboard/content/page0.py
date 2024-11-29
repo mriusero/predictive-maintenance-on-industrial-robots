@@ -2,7 +2,8 @@ import streamlit as st
 
 
 def page_0():
-    context = """ 
+    st.markdown(""" 
+
 # Phase I : Remaining Useful Life (RUL)_
 
 ## I.1) Context
@@ -16,124 +17,76 @@ Based on historical knowledge, the robot has three main failure modes:
 - **Fatigue Crack Growth** : *Failures due to the growth of cracks over time. (measured every month).*
 
 **Target:** Predict if each robot can survive the next 6 months
-"""
-    st.markdown(context)
 
+    """)
     col1, col2 = st.columns([3,2])
     with col1:
-        line_style = """
-                    <style>
-                    .full-width-line {
-                        height: 2px;
-                        background-color: #FFFFFF; /* Changez la couleur ici (rouge) */
-                        width: 100%;
-                        margin: 20px 0;
-                    }
-                    </style>
-                """
-        line_html = '<div class="full-width-line"></div>'
-        st.markdown(line_style, unsafe_allow_html=True)
-        st.markdown(line_html, unsafe_allow_html=True)
-        knowledges = """
-## I.2) Knowledges
-### a) Physical model for the crack growth process
+        st.write("---")
 
-On suppose que le processus de croissance des fissures suit une fonction logistique :
+        st.markdown("""
+## I.2) Knowledge  
+### a) Physical model for the crack growth process  
+
+It is assumed that the crack growth process follows a logistic function:  
+
+$$  
+y(t) = \\frac{β2}{1 + e^{-(β0 + β1 t)}}  
+$$  
+
+where $y(t)$ is the crack length in arbitrary units, $t$ is time in months, and $β0$, $β1$, $β2$ are parameters related to the material properties.  
+A failure occurs when  
+
+$$  
+y(t) > y_{th}  
+$$  
+
+where  
+
+$y_{th} = 0.85$.  
+        """)
+        st.write("---")
+        st.markdown("""
+        
+### b) Process noise, observation noise, and state space models  
+Due to process noise, the parameters $β0$, $β1$, $β2$ may slightly vary over time. Additionally, because of measurement equipment limitations, the measured crack length is affected by significant observation noise.  
+
+The crack length is measured every $1$ month. The following state space model is used to capture the uncertainty in both the process and the observation:  
 
 $$
-y(t) = {β2} / {1 + e^{-(β0 + β1 t)}}
+z_k = y_k + \epsilon_k
 $$
-
-où $y(t)$ est la longueur de la fissure en unités arbitraires, $t$ est le temps en mois et $β0$, $β1$, $β2$ sont des paramètres liés aux propriétés du matériau.
-
-Une défaillance se produit lorsque
-
+where
 $$
-y(t) > y_{th}
+y_k = {β{2,k}} / {1 + e^{-(β{0,k} + β{1,k} t_k)}}
 $$
-
-où
-$y_{th} = 0.85$.
-"""
-        st.markdown(knowledges)
-        line_style = """
-                        <style>
-                        .full-width-line {
-                            height: 2px;
-                            background-color: #FFFFFF; /* Changez la couleur ici (rouge) */
-                            width: 100%;
-                            margin: 20px 0;
-                        }
-                        </style>
-                    """
-        line_html = '<div class="full-width-line"></div>'
-        st.markdown(line_style, unsafe_allow_html=True)
-        st.markdown(line_html, unsafe_allow_html=True)
-        process_noise = """
-        ### b) Process noise, observation noise, and state space models
-        En raison du bruit de processus, les paramètres $β0$, $β1$, $β2$ peuvent légèrement varier au fil du temps. De plus, en raison des limitations de l'équipement de mesure, la longueur de fissure mesurée est affectée par un bruit de mesure important.
-
-        La longueur de fissure est mesurée tous les $1$ mois. Le modèle d'espace d'état suivant est utilisé pour capturer l'incertitude du processus et de l'observation :
-
-        $$
-        z_k = y_k + \epsilon_k
-        $$
-
-        where
-
-        $$
-        y_k = {β{2,k}} / {1 + e^{-(β{0,k} + β{1,k} t_k)}}
-        $$
-
-        and
-
-        $$
-        β{2,k} = β{2,k-1} + \omega_{2,k-1}
-        $$
-
-        $$
-        β{1,k} = β{1,k-1} + \omega_{1,k-1}
-        $$
-
-        $$
-        β{0,k} = β{0,k-1} + \omega_{0,k-1}
-        $$
-
-        ###### - Observation Noise:
-
-        $$
-        \epsilon_k \sim \text{Normal}(0, 0.05)
-        $$
-
-        ###### - Process Noise:
-
-        $$
-        \omega_{2,k-1} \sim \text{Normal}(0, 0.01)
-        $$
-
-        $$
-        \omega_{1,k-1} \sim \text{Normal}(0, 0.001)
-        $$
-
-        $$
-        \omega_{0,k-1} \sim \text{Normal}(0, 0.01)
-        $$
-        """
-        st.markdown(process_noise)
-        line_style = """
-                                <style>
-                                .full-width-line {
-                                    height: 2px;
-                                    background-color: #FFFFFF; /* Changez la couleur ici (rouge) */
-                                    width: 100%;
-                                    margin: 20px 0;
-                                }
-                                </style>
-                            """
-        line_html = '<div class="full-width-line"></div>'
-        st.markdown(line_style, unsafe_allow_html=True)
-        st.markdown(line_html, unsafe_allow_html=True)
-        prediction = """
+and
+$$
+β{2,k} = β{2,k-1} + \omega_{2,k-1}
+$$
+$$
+β{1,k} = β{1,k-1} + \omega_{1,k-1}
+$$
+$$
+β{0,k} = β{0,k-1} + \omega_{0,k-1}
+$$
+###### - Observation Noise:
+$$
+\epsilon_k \sim \text{Normal}(0, 0.05)
+$$
+###### - Process Noise:
+$$
+\omega_{2,k-1} \sim \text{Normal}(0, 0.01)
+$$
+$$
+\omega_{1,k-1} \sim \text{Normal}(0, 0.001)
+$$
+$$
+\omega_{0,k-1} \sim \text{Normal}(0, 0.01)
+$$
+        """)
+        st.write("---")
+        st.markdown("""
+        
         ### c) Prediction and metrics
 
         Le participant doit prédire si le RUL d'un élément est inférieur à $6$ mois :
@@ -156,106 +109,64 @@ $y_{th} = 0.85$.
 
         où $\text{Reward}_i$ est calculé comme mentionné précédemment.
 
-        """
-        st.markdown(prediction)
-        line_style = """
-                                <style>
-                                .full-width-line {
-                                    height: 2px;
-                                    background-color: #FFFFFF; /* Changez la couleur ici (rouge) */
-                                    width: 100%;
-                                    margin: 20px 0;
-                                }
-                                </style>
-                            """
-        line_html = '<div class="full-width-line"></div>'
-        st.markdown(line_style, unsafe_allow_html=True)
-        st.markdown(line_html, unsafe_allow_html=True)
-        train_test = """
-        ### # Training_
-            * failure_data.csv :  résumé des temps jusqu'à la panne pour les 50 échantillons.
+        """)
+        st.write("---")
+        st.markdown("""
+### # Training_
+    * failure_data.csv :  résumé des temps jusqu'à la panne pour les 50 échantillons
+        - Type int    --> item_id
+        - Type int    --> Time to failure (months)
+        - Type string --> Failure mod
+        
+        // Indique le mode de défaillance pour chaque échantillon :
+        // 'Infant Mortality', 'Fatigue Crack', ou 'Control Board Failure
+        
+    * Degradation data (a folder with x50 .csv files):  mesures de la longueur de fissure pour les 50 échantillons. 
+        - Type int   --> time (months)  
+        - Type float --> crack length (arbitary unit)  
+        - Type int   --> rul (months) 
+        
+        // Chaque fichier CSV dans ce dossier correspond à un échantillon spécifique.
+        // Le nom du fichier `item_X` correspond à l'identifiant de l'échantillon (`item_id`) dans le fichier `failure_data.csv`.
 
-                - Type int    --> item_id
-                - Type int    --> Time to failure (months)
-                - Type string --> Failure mode
+            """)
+        st.write("---")
+        st.markdown("""
+### # Testing_
+    Pour évaluer la performance du modèle, un jeu de données de "pseudo-test" basé sur le jeu de données de training permet d'évaluer la performance de prédiction
+    `training/pseudo_testing_data`  
+    
+        --> un jeu de données spécifiquement conçu pour évaluer les performances du modèle de manière similaire à un test
+        
+    `training/pseudo_testing_data_with_truth`  
+        --> un jeu de données similaire à pseudo_testing_data, mais inclut également les valeurs réelles pour évaluer les prédictions.  
+        --> les fichiers dans ce dossier incluent Solution.csv, qui contient les vérités de terrain pour les prévisions de RUL
+        
+    `testing`  
+        --> contient des données de test qui sont utilisées pour évaluer la performance du modèle dans un contexte plus général.  
+        --> Il y a différents sous-dossiers pour chaque scénario de test (scenario_0 à scenario_9) 
+        
+        """)
+        st.markdown("""
+Le jeu de données de test dans le dossier `testing/group_0` est créé à partir des séquences complètes de fonctionnement,
+jusqu'à la défaillance en les tronquant aléatoirement à un moment donné $t_end$. L'objectif est de prédire la RUL : Remaining Useful Life à partir de ce point $t_end$.
 
-                // Indique le mode de défaillance pour chaque échantillon :
-                // 'Infant Mortality', 'Fatigue Crack', ou 'Control Board Failure'
+La troncature est effectuée de la manière suivante :
+- si le temps jusqu'à la défaillance est inférieur ou égal à $6$, nous conservons la séquence telle quelle.
+- si le temps jusqu'à la défaillance est supérieur à $6$, elle est tronquée à un point temporel aléatoire $t_end$, généré à partir d'une distribution uniforme de [1, ttf-1].
+        """)
 
-            * Degradation data (a folder with x50 .csv files):  mesures de la longueur de fissure pour les 50 échantillons.  
-
-                - Type int   --> time (months)  
-                - Type float --> crack length (arbitary unit)  
-                - Type int   --> rul (months)  
-
-                // Chaque fichier CSV dans ce dossier correspond à un échantillon spécifique.
-                // Le nom du fichier `item_X` correspond à l'identifiant de l'échantillon (`item_id`) dans le fichier `failure_data.csv`.
-
-            """
-        st.markdown(train_test)
-        line_style = """
-                                <style>
-                                .full-width-line {
-                                    height: 2px;
-                                    background-color: #FFFFFF; /* Changez la couleur ici (rouge) */
-                                    width: 100%;
-                                    margin: 20px 0;
-                                }
-                                </style>
-                            """
-        line_html = '<div class="full-width-line"></div>'
-        st.markdown(line_style, unsafe_allow_html=True)
-        st.markdown(line_html, unsafe_allow_html=True)
-        testing = """
-            ### # Testing_
-                Pour évaluer la performance du modèle, un jeu de données de "pseudo-test" basé sur le jeu de données de training permet d'évaluer la performance de prédiction.
-
-                `training/pseudo_testing_data`  
-                    --> un jeu de données spécifiquement conçu pour évaluer les performances du modèle de manière similaire à un test. 
-
-                `training/pseudo_testing_data_with_truth`  
-                    --> un jeu de données similaire à pseudo_testing_data, mais inclut également les valeurs réelles pour évaluer les prédictions.  
-                    --> les fichiers dans ce dossier incluent Solution.csv, qui contient les vérités de terrain pour les prévisions de RUL.
-
-                `testing`  
-                    --> contient des données de test qui sont utilisées pour évaluer la performance du modèle dans un contexte plus général.  
-                    --> Il y a différents sous-dossiers pour chaque scénario de test (scenario_0 à scenario_9) 
-            """
-        st.markdown(testing)
-        synthesis = """\n
-        Le jeu de données de test dans le dossier `testing/group_0` est créé à partir des séquences complètes de fonctionnement,
-        jusqu'à la défaillance en les tronquant aléatoirement à un moment donné $t_end$. L'objectif est de prédire la RUL : Remaining Useful Life à partir de ce point $t_end$. 
-
-        La troncature est effectuée de la manière suivante :
-        - si le temps jusqu'à la défaillance est inférieur ou égal à $6$, nous conservons la séquence telle quelle.
-        - si le temps jusqu'à la défaillance est supérieur à $6$, elle est tronquée à un point temporel aléatoire $t_end$, généré à partir d'une distribution uniforme de [1, ttf-1].
-                """
-        st.markdown(synthesis)
     with col2:
-        image_path = '/Users/mariusayrault/GitHub/Sorb-Data-Analytics/projet-sda-machine-learning/app/dashboard/content/pictures/industrial_robots.jpg'
+        image_path = 'dashboard/content/pictures/industrial_robots.jpg'
         st.image(image_path, caption='', use_column_width=False)
-        image_path = '/Users/mariusayrault/GitHub/Sorb-Data-Analytics/projet-sda-machine-learning/app/dashboard/content/pictures/industrial_robots_2.jpg'
+        image_path = 'dashboard/content/pictures/industrial_robots_2.jpg'
         st.image(image_path, caption='', use_column_width=False)
-        image_path = '/Users/mariusayrault/GitHub/Sorb-Data-Analytics/projet-sda-machine-learning/app/dashboard/content/pictures/monitoring.jpg'
+        image_path = 'dashboard/content/pictures/monitoring.jpg'
         st.image(image_path, caption='', use_column_width=False)
 
-    line_style = """
-            <style>
-            .full-width-line {
-                height: 2px;
-                background-color: #FFFFFF; /* Changez la couleur ici (rouge) */
-                width: 100%;
-                margin: 20px 0;
-            }
-            </style>
-        """
-    line_html = '<div class="full-width-line"></div>'
-    st.markdown(line_style, unsafe_allow_html=True)
-    st.markdown(line_html, unsafe_allow_html=True)
-    col1, col2 = st.columns(2)
-
-    with col1:
-        input_data = """
+    st.write("---")
+    st.markdown("""
+    
 ### # Input data_  
     .
     ├── testing
@@ -299,71 +210,10 @@ $y_{th} = 0.85$.
 
 
     18 directories, 326 files
-"""
-        st.markdown(input_data)
-        with col2:
-            project_tree = """
-    ### # Project Tree_       
-    - **README.md** : Fichier de documentation principal du projet.
-    - **app/** : Dossier principal contenant le code source de l'application.
-      - **__init__.py** : Initialise le module `app`.
-      - **app.py** : Point d'entrée principal de l'application.
-
-      - **dashboard/** : Dossier contenant les éléments du tableau de bord.
-        - **FailuresDetectModel/** : Sous-module pour la détection de pannes.
-          - **__init__.py** : Initialise le module `FailuresDetectModel`.
-          - **display.py** : Contient les fonctions d'affichage des données.
-          - **features.py** : Gestion des fonctionnalités spécifiques au modèle.
-          - **main.py** : Point d'entrée pour le modèle de détection de pannes.
-          - **models/** : Dossier contenant divers modèles de machine learning.
-            - **linear_regression.py** : Implémentation de la régression linéaire.
-            - **lstm_model.py** à **lstm_modelV6.py** : Différentes versions d’un modèle LSTM.
-            - **models_base.py** : Classe de base pour les modèles.
-            - **random_forest.py** : Implémentation d’un modèle de forêt aléatoire.
-          - **preprocessing.py** : Gestion de la prétraitement des données.
-          - **statistics.py** : Fonctions de statistiques pour l’analyse des données.
-          - **validation.py** : Fonctions pour la validation des modèles.
-
-      - **content/** : Contient le contenu affiché sur le tableau de bord.
-        - **page0.py** à **page6.py** : Différentes pages du tableau de bord.
-        - **pictures/** : Images utilisées dans l'interface utilisateur (ex. robots industriels).
-
-      - **functions/** : Fonctions utilitaires et spécifiques à l'application.
-        - **covariance.py** : Calcul de la covariance.
-        - **create_features.py** : Création de fonctionnalités spécifiques.
-        - **generate_data.py** : Génération de jeux de données.
-        - **homoscedasticity.py** : Analyse de l'homoscédasticité.
-        - **particle_filter.py** : Implémentation de filtre particulaire.
-        - **times_series.py** : Gestion des séries temporelles.
-        - **utils.py** : Fonctions utilitaires diverses.
-        - **visualizer.py** : Outils de visualisation.
-
-      - **layout.py** : Gestion de la mise en page du tableau de bord.
-      - **styles.css** : Fichier de styles CSS pour le tableau de bord.
-
-    - **data/** : Contient les données d'entrée pour les modèles.
-      - **input/** : Sous-dossier pour les données d'entrée.
-        - **testing_data/** : Données de test organisées par phases et scénarios.
-          - **phase1/** et **phase2/** : Phases de test contenant des scénarios multiples (0 à 9) avec les fichiers CSV correspondants pour chaque élément de test.
-
-            """
-            st.markdown(project_tree)
-    line_style = """
-                            <style>
-                            .full-width-line {
-                                height: 2px;
-                                background-color: #FFFFFF; /* Changez la couleur ici (rouge) */
-                                width: 100%;
-                                margin: 20px 0;
-                            }
-                            </style>
-                        """
-    line_html = '<div class="full-width-line"></div>'
-    st.markdown(line_style, unsafe_allow_html=True)
-    st.markdown(line_html, unsafe_allow_html=True)
-
-    ### ------- PHASE II ------------
-    phase2 ="""
+""")
+    st.write("---")
+    st.markdown("""
+    
 # Phase II : Maintenance prédictive d'un robot (II)
 
 **Context**
@@ -388,8 +238,6 @@ Le score final est calculé en cumulant les récompenses et les pénalités en f
 **Soumission des résultats :**
 Les participants doivent soumettre leur solution au format .csv conformément au modèle fourni sur la plateforme Kaggle.
 
+    """)
 
-
-    """
-    st.markdown(phase2)
 
