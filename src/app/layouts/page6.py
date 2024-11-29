@@ -1,7 +1,5 @@
 import streamlit as st
-import pandas as pd
-from ..functions.utils import dataframing_data
-from ..FailuresDetectModel.main import handle_models
+from src.FailuresDetectModel.main import handle_models
 
 def page_6():
     st.markdown('<div class="header">#6 Prediction_</div>', unsafe_allow_html=True)

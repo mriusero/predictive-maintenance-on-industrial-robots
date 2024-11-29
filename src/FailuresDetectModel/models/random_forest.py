@@ -1,9 +1,7 @@
-import numpy as np
 import pandas as pd
-from ...functions import load_failures
+from src.functions import load_failures
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.preprocessing import LabelEncoder
-from sklearn.metrics import classification_report
 import streamlit as st
 from ..validation import generate_submission_file, calculate_score
 

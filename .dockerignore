@@ -1,0 +1,10 @@
+# MacOS
+.DS_Store
+
+# PyCharm
+.idea/
+__pycache__/
+
+
+# Jupyter Notebook
+*.ipynb

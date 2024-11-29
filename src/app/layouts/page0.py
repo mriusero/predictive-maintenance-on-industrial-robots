@@ -157,11 +157,11 @@ La troncature est effectuée de la manière suivante :
         """)
 
     with col2:
-        image_path = 'dashboard/content/pictures/industrial_robots.jpg'
+        image_path = 'src/app/layouts/pictures/industrial_robots.jpg'
         st.image(image_path, caption='', use_column_width=False)
-        image_path = 'dashboard/content/pictures/industrial_robots_2.jpg'
+        image_path = 'src/app/layouts/pictures/industrial_robots_2.jpg'
         st.image(image_path, caption='', use_column_width=False)
-        image_path = 'dashboard/content/pictures/monitoring.jpg'
+        image_path = 'src/app/layouts/pictures/monitoring.jpg'
         st.image(image_path, caption='', use_column_width=False)
 
     st.write("---")

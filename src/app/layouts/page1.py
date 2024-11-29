@@ -2,8 +2,8 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 
-from ..FailuresDetectModel import run_statistical_test
-from ..functions import display_variable_types
+from src.FailuresDetectModel import run_statistical_test
+from src.functions import display_variable_types
 
 
 def page_1():

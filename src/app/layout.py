@@ -1,7 +1,7 @@
 import os
 import gc
 import streamlit as st
-from .functions import load_data, DataVisualizer
+from src.functions import load_data, DataVisualizer
 from .components import github_button
 
 
@@ -14,7 +14,7 @@ def load_css():
         st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html=True)
 
 def app_layout():
-    from .content import page_0, page_1, page_2, page_3, page_4, page_5, page_6
+    from .layouts import page_0, page_1, page_2, page_3, page_4, page_5, page_6
 
     st.set_page_config(
         page_title="SDA-MACHINE-LEARNING",

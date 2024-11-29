@@ -1,8 +1,6 @@
 import pandas as pd
 import streamlit as st
-from ..FailuresDetectModel import clean_data
-from ..functions import DataVisualizer, compare_dataframes
-from ..FailuresDetectModel import FeatureAdder, run_statistical_test
+from src.FailuresDetectModel import run_statistical_test
 
 def page_3():
 

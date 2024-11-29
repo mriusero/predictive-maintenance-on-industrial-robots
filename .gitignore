@@ -8,10 +8,10 @@
 *.pyc
 
 # Hide Random data generation
-/app/data/input/training_data/pseudo_testing_data
-/app/data/input/training_data/pseudo_testing_data_with_truth
-/app/data/output/pseudo_testing
-/app/data/output/testing/
-/app/data/output/submission/
+/data/input/training_data/pseudo_testing_data
+/data/input/training_data/pseudo_testing_data_with_truth
+/data/output/pseudo_testing
+/data/output/testing/
+/data/output/submission/
 
 *.ipynb
