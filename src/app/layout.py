@@ -43,7 +43,7 @@ def app_layout():
         colA, colB, colC, colD = st.columns ([1,4,4,3])
         with colA:
             #st.text("")
-            github_button('https://github.com/mriusero/projet-sda-machine-learning')
+            github_button('https://github.com/mriusero/predictive-maintenance-on-industrial-robots')
         with colB:
             #st.text("")
             st.text("")
