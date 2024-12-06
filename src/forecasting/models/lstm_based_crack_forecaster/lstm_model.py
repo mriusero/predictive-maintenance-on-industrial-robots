@@ -1,10 +1,10 @@
 import numpy as np
 import pandas as pd
 import streamlit as st
-from .models_base import ModelBase
+from src.forecasting.models.models_base import ModelBase
 
-from ..features import FeatureAdder
-from ..display import DisplayData
+from src.forecasting.processing.features import FeatureAdder
+from src.forecasting.evaluation.display import DisplayData
 
 
 from tensorflow.keras.preprocessing.sequence import pad_sequences

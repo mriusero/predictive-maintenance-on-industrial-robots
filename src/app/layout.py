@@ -1,7 +1,7 @@
 import os
 import gc
 import streamlit as st
-from src.functions import load_data, DataVisualizer
+from src.core import load_data, DataVisualizer
 from .components import github_button
 
 

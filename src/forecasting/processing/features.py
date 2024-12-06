@@ -1,6 +1,6 @@
 import pandas as pd
 from statsmodels.tsa.seasonal import STL
-from src.functions import ParticleFilter
+from src.core import ParticleFilter
 
 
 class FeatureAdder:

@@ -1,6 +1,6 @@
 import streamlit as st
 
-from src.functions import dataframing_data
+from src.core import dataframing_data
 
 
 def page_2():                          #TITLE

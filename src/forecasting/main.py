@@ -1,12 +1,11 @@
 # main.py
 import os
 import streamlit as st
-from ..FailuresDetectModel import (RandomForestClassifierModel, LSTMModel, GradientBoostingSurvivalModel)
+from ..forecasting import (LSTMModel, GradientBoostingSurvivalModel)
 
 def instance_model(model_name):
     model_classes = {
         'LSTMModel': lambda: LSTMModel(min_sequence_length=2, forecast_months=6),
-        'RandomForestClassifierModel': lambda: RandomForestClassifierModel(),
         'GradientBoostingSurvivalModel': lambda: GradientBoostingSurvivalModel()
     }
     if model_name not in model_classes:

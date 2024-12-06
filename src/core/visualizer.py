@@ -5,8 +5,8 @@ import plotly.graph_objects as go
 from statsmodels.tsa.seasonal import STL
 import seaborn as sns
 import pandas as pd
-from src.FailuresDetectModel import clean_data, FeatureAdder
-from ..functions import dataframing_data
+from src.forecasting import clean_data, FeatureAdder
+from ..core import dataframing_data
 
 
 class DataVisualizer:

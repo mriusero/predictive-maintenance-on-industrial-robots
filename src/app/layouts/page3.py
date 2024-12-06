@@ -1,6 +1,6 @@
 import pandas as pd
 import streamlit as st
-from src.FailuresDetectModel import run_statistical_test
+from src.forecasting import run_statistical_test
 
 def page_3():
 

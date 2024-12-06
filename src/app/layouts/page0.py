@@ -45,7 +45,7 @@ where
 $y_{th} = 0.85$.  
         """)
         st.write("---")
-        st.markdown("""
+        st.markdown(r"""
         
 ### b) Process noise, observation noise, and state space models  
 Due to process noise, the parameters $β0$, $β1$, $β2$ may slightly vary over time. Additionally, because of measurement equipment limitations, the measured crack length is affected by significant observation noise.  
@@ -85,7 +85,7 @@ $$
 $$
         """)
         st.write("---")
-        st.markdown("""
+        st.markdown(r"""
         
         ### c) Prediction and metrics
 
@@ -212,7 +212,7 @@ La troncature est effectuée de la manière suivante :
     18 directories, 326 files
 """)
     st.write("---")
-    st.markdown("""
+    st.markdown(r"""
     
 # Phase II : Maintenance prédictive d'un robot (II)
 
@@ -240,4 +240,70 @@ Les participants doivent soumettre leur solution au format .csv conformément au
 
     """)
 
+    st.write("""
+    # Project Tree
+    
+        Dockerfile
+        README.md
+        app.py
+        data
+        ├── input
+        │   ├── testing_data
+        │   │   ├── phase1/
+        │   │   │   └── testing_item_{0..49}.csv
+        │   │   └── phase2/
+        │   │       └── scenario_{0..9}/
+        │   │           └── item_{0..11}.csv
+        │   └── training_data
+        │       ├── degradation_data/
+        │       │   └── item_{0..49}.csv
+        │       └── failure_data.csv
+        └── output
+            └── training/
+                └── training_data.csv
+        requirements.txt
+        src
+        ├── __init__.py
+        ├── app/
+        │   ├── __init__.py
+        │   ├── components.py
+        │   ├── layout.py
+        │   ├── layouts/
+        │   │   ├── __init__.py
+        │   │   ├── page{0..6}.py
+        │   │   └── pictures/
+        │   │       ├── industrial_robots.jpg
+        │   │       ├── industrial_robots_2.jpg
+        │   │       └── monitoring.jpg
+        │   └── styles.css
+        ├── core/
+        │   ├── __init__.py
+        │   ├── generate_data.py
+        │   ├── particle_filter.py
+        │   ├── statistics.py
+        │   ├── utils.py
+        │   └── visualizer.py
+        └── forecasting/
+            ├── __init__.py
+            ├── evaluation/
+            │   ├── __init__.py
+            │   ├── display.py
+            │   └── validation.py
+            ├── main.py
+            ├── models/
+            │   ├── __init__.py
+            │   ├── fleet_management_predictor/
+            │   │   └── __init__.py
+            │   ├── lstm_based_crack_forecaster/
+            │   │   ├── __init__.py
+            │   │   └── lstm_model.py
+            │   ├── models_base.py
+            │   └── rul_survival_predictor/
+            │       ├── __init__.py
+            │       └── gradient_boosting.py
+            └── processing/
+                ├── __init__.py
+                ├── features.py
+                └── preprocessing.py
 
+    """)

@@ -3,7 +3,7 @@ import pandas as pd
 
 def generate_submission_file(model_name, output_path, step):
 
-    template = pd.read_csv('../app/data/output/submission/template/submission_template.csv')
+    template = pd.read_csv('data/output/submission/template/submission_template.csv')
     submission_df = template.copy()
     submission_df['label'] = 0
     submission_df['predicted_rul'] = 0
@@ -65,7 +65,7 @@ def generate_submission_file(model_name, output_path, step):
 
 def calculate_score(output_path, step):
 
-    solution = pd.read_csv('../app/data/input/training_data/pseudo_testing_data_with_truth/Solution.csv')
+    solution = pd.read_csv('data/input/training_data/pseudo_testing_data_with_truth/Solution.csv')
     submission = pd.read_csv(f"{output_path}/submission_{step}.csv")
 
     reward = 2
