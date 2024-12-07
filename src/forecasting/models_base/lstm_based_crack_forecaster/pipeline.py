@@ -8,7 +8,7 @@ from .evaluation import save_predictions, display_results
 
 from ...validation.validation import generate_submission_file, calculate_score
 
-from .configs import MODEL_NAME, OUTPUT_PATH, MIN_SEQUENCE_LENGTH, FORECAST_MONTHS
+from .configs import MODEL_NAME, SUBMISSION_FOLDER, MIN_SEQUENCE_LENGTH, FORECAST_MONTHS
 
 
 def lstm_training_pipeline(train_df, pseudo_test_with_truth_df, optimize=False):
@@ -29,11 +29,11 @@ def lstm_training_pipeline(train_df, pseudo_test_with_truth_df, optimize=False):
     # Validation croisée sur pseudo_test_with_truth_df
     all_predictions = predict_futures_values(model, pseudo_test_with_truth_df)
     lstm_predictions_cross_val = add_predictions_to_data(pseudo_test_with_truth_df, all_predictions, min_sequence_length=MIN_SEQUENCE_LENGTH)
-    save_predictions(OUTPUT_PATH, lstm_predictions_cross_val, step='cross-val')
+    save_predictions(SUBMISSION_FOLDER, lstm_predictions_cross_val, step='cross-val')
 
     # Génération du fichier de soumission et calcul du score pour la validation croisée
-    generate_submission_file(model_name=MODEL_NAME, submission_path=OUTPUT_PATH, step='cross-val')
-    score = calculate_score(model_name=MODEL_NAME, submission_path=OUTPUT_PATH, step='cross-val')
+    generate_submission_file(model_name=MODEL_NAME, submission_path=SUBMISSION_FOLDER, step='cross-val')
+    score = calculate_score(model_name=MODEL_NAME, submission_path=SUBMISSION_FOLDER, step='cross-val')
     st.write(f"Score de cross validation pour {MODEL_NAME}: {score}")
 
 
