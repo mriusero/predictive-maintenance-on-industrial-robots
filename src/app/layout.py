@@ -1,7 +1,7 @@
 import os
 import gc
 import streamlit as st
-from src.functions import load_data, DataVisualizer
+from src.core import load_data, DataVisualizer
 from .components import github_button
 
 
@@ -28,11 +28,11 @@ def app_layout():
 
     page = st.sidebar.radio("Project_", ["#0 Introduction_",
                                          "#1 Exploration_",
-                                         "#2 Cleaning_",
-                                         "#3 Feature Engineering_",
-                                         "#4 Statistics_",
-                                         "#5 Training_",
-                                         "#6 Prediction_",
+                                         "#2 Feature Engineering_",
+                                         "#3 Phase I_",
+                                         "#4 Phase II_",
+                                         "#5 Empty_",
+                                         "#6 Empty_",
                                          ])
     # -- LAYOUT --
     col1, col2 = st.columns([6,4])
@@ -93,15 +93,15 @@ def app_layout():
         page_0()
     elif page == "#1 Exploration_":
         page_1()
-    elif page == "#2 Cleaning_":
+    elif page == "#2 Feature Engineering_":
         page_2()
-    elif page == "#3 Feature Engineering_":
+    elif page == "#3 Phase I_":
         page_3()
-    elif page == "#4 Statistics_":
+    elif page == "#4 Phase II_":
         page_4()
-    elif page == "#5 Training_":
+    elif page == "#5 Empty_":
         page_5()
-    elif page == "#6 Prediction_":
+    elif page == "#6 Empty_":
         page_6()
 
     st.sidebar.markdown("&nbsp;")

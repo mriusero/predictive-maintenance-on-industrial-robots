@@ -1,4 +1,4 @@
-from src.functions import generate_pseudo_testing_data, generate_pseudo_testing_data_with_truth
+from src.core import generate_pseudo_testing_data, generate_pseudo_testing_data_with_truth
 from src.app import app_layout
 
 def main():

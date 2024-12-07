@@ -1,1 +1,1 @@
-from src import app, FailuresDetectModel, functions
+from src import app, forecasting, core

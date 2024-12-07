@@ -1,16 +1,16 @@
 # validation.py
 import pandas as pd
 
-def generate_submission_file(model_name, output_path, step):
+def generate_submission_file(model_name, submission_path, step):
 
-    template = pd.read_csv('../app/data/output/submission/template/submission_template.csv')
+    template = pd.read_csv('data/output/submission/template/submission_template.csv')
     submission_df = template.copy()
     submission_df['label'] = 0
     submission_df['predicted_rul'] = 0
 
     if model_name == 'LSTMModel':
 
-        lstm_results = pd.read_csv(f"{output_path}/lstm_predictions_{step}.csv")
+        lstm_results = pd.read_csv(f"{submission_path}/lstm_predictions_.csv")
         lstm_results = lstm_results[['item_id',
                                    #  'Infant mortality', 'Control board failure', 'Fatigue crack',
                                      'length_measured', 'length_filtered']]
@@ -37,21 +37,10 @@ def generate_submission_file(model_name, output_path, step):
         #    if failure == 'Infant Mortality':
         #        submission_df.loc[submission_df['item_index'] == item_index, 'label'] = int(1)
 
-    if model_name == 'RandomForestClassifierModel':
 
-        rf_results = pd.read_csv(f"{output_path}/rf_predictions_{step}.csv")
+    if model_name == 'rul_survival_predictor':
 
-        for item_index, group in rf_results.groupby('item_id'):
-            formatted_item_index = f"item_{item_index}"
-
-            if (group['Failure mode (rf)'] == 'Control board failure').any():
-                submission_df.loc[submission_df['item_index'] == formatted_item_index, 'label'] = int(1)
-            elif (group['Failure mode (rf)'] == 'Infant mortality').any():
-                submission_df.loc[submission_df['item_index'] == formatted_item_index, 'label'] = int(1)
-
-    if model_name == 'GradientBoostingSurvivalModel':
-
-        gbsa_results = pd.read_csv(f"{output_path}/gbsa_predictions_{step}.csv")
+        gbsa_results = pd.read_csv(f"{submission_path}/{model_name}/{model_name}_{step}.csv")
         gbsa_results['item_id'] = gbsa_results['item_id'].astype(int)
         for item_index, group in gbsa_results.groupby('item_id'):
             formatted_item_index = f"item_{item_index}"
@@ -61,12 +50,13 @@ def generate_submission_file(model_name, output_path, step):
     else:
         raise ValueError("'model_name' not defined in 'generate_submission_file()'")
 
-    return submission_df.sort_values('item_index').to_csv(f"{output_path}/submission_{step}.csv", index=False)
+    return submission_df.sort_values('item_index').to_csv(f"{submission_path}/{model_name}/submission_{step}.csv", index=False)
 
-def calculate_score(output_path, step):
 
-    solution = pd.read_csv('../app/data/input/training_data/pseudo_testing_data_with_truth/Solution.csv')
-    submission = pd.read_csv(f"{output_path}/submission_{step}.csv")
+def calculate_score(model_name, submission_path, step):
+
+    solution = pd.read_csv('data/input/training_data/pseudo_testing_data_with_truth/Solution.csv')
+    submission = pd.read_csv(f"{submission_path}/{model_name}/submission_{step}.csv")
 
     reward = 2
     penalty_false_positive = -1 / 60

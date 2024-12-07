@@ -1,11 +1,10 @@
-import pandas as pd
-import plotly.graph_objects as go
-import plotly.express as px
 import numpy as np
-from sklearn.model_selection import learning_curve
+import plotly.express as px
+import plotly.graph_objects as go
 import scipy.stats as stats
 import streamlit as st
 from scipy.stats import gaussian_kde  # Ensure this import for KDE in `plot_distribution_histogram`
+from sklearn.model_selection import learning_curve
 
 
 class DisplayData:
