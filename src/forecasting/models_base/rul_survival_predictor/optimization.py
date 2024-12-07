@@ -29,9 +29,10 @@ def save_hyperparameters(best_params):
         pickle.dump(best_params, f)
 
 
-def optimize_hyperparameters(x_train, y_train):
+def optimize_hyperparameters(x_train, y_train, percentile=50):
     """
     Optimizes hyperparameters using Optuna.
+    percentile : pourcentage pour calculer la survie (par défaut 50%)
     """
     def objective(trial):
         params = {
@@ -45,17 +46,18 @@ def optimize_hyperparameters(x_train, y_train):
         model = GradientBoostingSurvivalAnalysis(**params)
         model.fit(x_train, y_train)
         try:
-            median_times = []
+            survival_times = []
             for sf in model.predict_survival_function(x_train):
                 if len(sf.x) == 0:
-                    median_times.append(np.nan)
+                    survival_times.append(np.nan)
                     continue
-                idx = np.searchsorted(sf.y, 0.5, side='left')
+                # Calculer l'indice du percentile souhaité (percentile au lieu de 50)
+                idx = np.searchsorted(sf.y, percentile / 100.0, side='left')
                 if idx >= len(sf.x):
-                    median_times.append(sf.x[-1])
+                    survival_times.append(sf.x[-1])
                 else:
-                    median_times.append(sf.x[idx] if idx < len(sf.x) else sf.x[-1])
-            median_times = [t if not np.isnan(t) else max(y_train['time (months)']) for t in median_times]
+                    survival_times.append(sf.x[idx] if idx < len(sf.x) else sf.x[-1])
+            survival_times = [t if not np.isnan(t) else max(y_train['time (months)']) for t in survival_times]
 
         except IndexError as e:
             print(f"IndexError encountered: {e}")
@@ -63,12 +65,14 @@ def optimize_hyperparameters(x_train, y_train):
                 print(f"sf.x: {sf.x}, sf.y: {sf.y}")
             raise e
 
-        ci = concordance_index_censored(y_train['label'], y_train['time (months)'], np.array(median_times))[0]
+        ci = concordance_index_censored(y_train['label'], y_train['time (months)'], np.array(survival_times))[0]
         return ci
 
     study = optuna.create_study(direction='maximize')
-    study.optimize(objective, n_trials=25)
+    study.optimize(objective, n_trials=100)
 
     save_hyperparameters(study.best_params)
 
     return study.best_params
+
+

@@ -84,7 +84,6 @@ class GradientBoostingSurvivalModel:
         """
         file_path = f"{submission_path}/{model_name}/{model_name}_{step}.csv"
         predictions_df.to_csv(file_path, index=False)
-        print(f"Saved predictions at {submission_path}/{model_name}/{model_name}_{step}.csv")
 
 
     def save_model(self, path: str):

@@ -2,7 +2,7 @@
 import os
 import streamlit as st
 
-from .models_base.rul_survival_predictor import survival_predictor_pipeline
+from .models_base.rul_survival_predictor.pipeline import survival_predictor_training, survival_predictor_prediction
 
 
 def handle_models():
@@ -17,8 +17,12 @@ def handle_models():
     # Optimization toggle
     optimize = st.checkbox('Optimize Hyperparameters', value=False)
 
-    # Run pipeline phase I
+    # Run pipeline phase I (TRAINING)
+    if st.button('Run training phase I'):
+        os.system('clear')
+        survival_predictor_training(train_df, pseudo_test_with_truth_df, optimize=optimize)
+
+    # Run pipeline phase I (PREDICTIONS)
     if st.button('Run predictions phase I'):
         os.system('clear')
-
-        survival_predictor_pipeline(train_df, pseudo_test_with_truth_df, test_df, optimize=optimize)
+        survival_predictor_prediction(train_df, test_df)

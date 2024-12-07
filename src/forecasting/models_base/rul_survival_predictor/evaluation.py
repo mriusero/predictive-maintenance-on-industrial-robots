@@ -20,6 +20,7 @@ def measure_performance_and_plot(predictions_df: pd.DataFrame):
     st.write("Classification Report:")
     st.dataframe(pd.DataFrame(report).transpose())
     print(pd.DataFrame(report).transpose())
+    print("\n")
 
     col1, col2, col3 = st.columns(3)
 

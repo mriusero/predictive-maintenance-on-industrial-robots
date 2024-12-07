@@ -66,6 +66,6 @@ def analyze(
     model.save_predictions(model_name, submission_path, step, predictions_merged)   # Save predictions
     generate_submission_file(model_name, submission_path, step)                     # Generate submission file
     score = calculate_score(model_name, submission_path, step)                      # Calculate score
-    st.write(f"Validation score for {step}: {score}")
+    st.write(f"Validation score for {step}: `{score}`")
 
     return predictions_merged
