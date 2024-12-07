@@ -1,9 +1,8 @@
-import streamlit as st
 import pandas as pd
-
-from src.forecasting.validation.validation import generate_submission_file, calculate_score
+import streamlit as st
 
 from src.forecasting.models_base.rul_survival_predictor.configs import SELECTED_VARIABLES
+from src.forecasting.validation.validation import generate_submission_file, calculate_score
 
 
 def select_variables(df):

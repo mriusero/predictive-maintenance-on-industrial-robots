@@ -1,5 +1,5 @@
-from sklearn.preprocessing import StandardScaler, MinMaxScaler
 import pandas as pd
+from sklearn.preprocessing import StandardScaler, MinMaxScaler
 
 
 def clean_data(df):

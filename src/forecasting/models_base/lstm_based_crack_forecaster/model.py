@@ -1,9 +1,11 @@
 import numpy as np
-import pandas as pd
 import streamlit as st
+import os
+import pickle
 
-from tensorflow.keras.models import Model
 from tensorflow.keras.layers import LSTM, Dense, Masking, Input, Dropout
+from tensorflow.keras.models import Model
+
 
 class LSTMModel():
     def __init__(self, min_sequence_length=2, forecast_months=6):
@@ -95,3 +97,14 @@ class LSTMModel():
             st.success('Predictions generated successfully!')
 
         return {'lengths_filtered_output': predictions_filtered, 'lengths_measured_output': predictions_measured}
+
+    def save_model(self, path: str):
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        with open(path, 'wb') as f:
+            pickle.dump(self, f)
+
+
+    @staticmethod
+    def load_model(path: str):
+        with open(path, 'rb') as f:
+            return pickle.load(f)

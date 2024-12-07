@@ -1,7 +1,8 @@
-import streamlit as st
 import numpy as np
+import streamlit as st
 
 from .processing import prepare_test_sequence
+
 
 def predict_futures_values(model, df):
     if model is None:

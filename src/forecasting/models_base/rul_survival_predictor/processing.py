@@ -1,7 +1,9 @@
-import pandas as pd
-import numpy as np
 from typing import Optional, List, Tuple
+
+import numpy as np
+import pandas as pd
 from sksurv.util import Surv
+
 
 def prepare_data(
     df: pd.DataFrame,

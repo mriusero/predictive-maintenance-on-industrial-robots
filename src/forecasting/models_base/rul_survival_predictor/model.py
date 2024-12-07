@@ -1,8 +1,9 @@
 import os
 import pickle
+from typing import List, Optional
+
 import numpy as np
 import pandas as pd
-from typing import List, Tuple, Optional
 from sksurv.ensemble import GradientBoostingSurvivalAnalysis
 
 from .optimization import load_hyperparameters

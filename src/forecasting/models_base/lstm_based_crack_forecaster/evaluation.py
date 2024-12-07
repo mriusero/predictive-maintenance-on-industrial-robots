@@ -1,5 +1,7 @@
 import streamlit as st
+
 from src.forecasting.validation.display import DisplayData
+
 
 def save_predictions(output_path, df, step):
 
@@ -9,7 +11,7 @@ def save_predictions(output_path, df, step):
     return f"Predictions saved successfully: {output_path}"
 
 
-def display_results(self, df):
+def display_results(df):
     display = DisplayData(df)
 
     col1, col2 = st.columns(2)

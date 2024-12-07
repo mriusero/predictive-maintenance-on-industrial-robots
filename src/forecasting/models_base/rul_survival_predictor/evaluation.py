@@ -1,7 +1,6 @@
-import streamlit as st
-import pandas as pd
 import matplotlib.pyplot as plt
-
+import pandas as pd
+import streamlit as st
 from sklearn.metrics import (
     confusion_matrix, ConfusionMatrixDisplay, classification_report,
     roc_curve, auc, precision_recall_curve
