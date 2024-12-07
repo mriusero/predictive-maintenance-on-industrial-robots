@@ -4,8 +4,6 @@ from src.forecasting.validation.validation import calculate_score, generate_subm
 
 from src.core.statistics import run_statistical_test
 
-from .models_base.models_base import ModelBase
-from .models_base import LSTMModel
 from src.forecasting.validation.display import DisplayData
 
 __all__ = [
@@ -13,6 +11,5 @@ __all__ = [
     'FeatureAdder',
     'calculate_score', 'generate_submission_file',
     'run_statistical_test',
-    'ModelBase', 'LSTMModel',
     'DisplayData'
 ]

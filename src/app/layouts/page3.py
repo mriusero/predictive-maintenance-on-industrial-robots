@@ -1,6 +1,6 @@
 import streamlit as st
 
-from src.forecasting.main import handle_models
+from src.forecasting.main import handle_phase_one
 
 
 def page_3():
@@ -10,4 +10,4 @@ def page_3():
     Here is the page dedicated to the first phase of the project.
     """)
 
-    handle_models()
+    handle_phase_one()

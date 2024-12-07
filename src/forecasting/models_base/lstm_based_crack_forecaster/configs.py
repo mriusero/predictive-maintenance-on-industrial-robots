@@ -1,0 +1,4 @@
+MODEL_NAME = 'LSTMModel'
+OUTPUT_PATH = 'data/output/submission/lstm'
+MIN_SEQUENCE_LENGTH = 2
+FORECAST_MONTHS = 6

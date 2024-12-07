@@ -8,7 +8,7 @@ from .processing import prepare_data
 from .optimization import optimize_hyperparameters
 from .helper import SELECTED_VARIABLES, analyze
 from .evaluation import display_results
-from ..configs import MODEL_NAME, SUBMISSION_FOLDER, MODEL_PATH
+from src.forecasting.models_base.rul_survival_predictor.configs import MODEL_NAME, SUBMISSION_FOLDER, MODEL_PATH
 
 from src.forecasting.validation.validation import generate_submission_file, calculate_score
 

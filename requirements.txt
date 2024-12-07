@@ -24,17 +24,3 @@ filterpy==1.4.5
 
 # Deep Learning
 tensorflow==2.16.2
-
-
-
-
-
-
-
-
-
-
-
-
-
-

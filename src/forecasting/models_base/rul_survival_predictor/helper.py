@@ -3,7 +3,7 @@ import pandas as pd
 
 from src.forecasting.validation.validation import generate_submission_file, calculate_score
 
-from ..configs import SELECTED_VARIABLES
+from src.forecasting.models_base.rul_survival_predictor.configs import SELECTED_VARIABLES
 
 
 def select_variables(df):

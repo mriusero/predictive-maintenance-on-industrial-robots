@@ -6,7 +6,7 @@ import os
 from sksurv.ensemble import GradientBoostingSurvivalAnalysis
 from sksurv.metrics import concordance_index_censored
 
-from ..configs import MODEL_FOLDER, HYPERPARAMETERS_PATH
+from src.forecasting.models_base.rul_survival_predictor.configs import MODEL_FOLDER, HYPERPARAMETERS_PATH
 
 def load_hyperparameters():
     """

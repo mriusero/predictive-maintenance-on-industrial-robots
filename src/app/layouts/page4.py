@@ -1,4 +1,5 @@
 import streamlit as st
+from src.forecasting.main import handle_phase_two
 
 
 def page_4():
@@ -6,3 +7,5 @@ def page_4():
     st.markdown("""
     Here is the page dedicated to the second phase of the project.
     """)
+
+    handle_phase_two()
