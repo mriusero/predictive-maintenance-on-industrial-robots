@@ -1,10 +1,10 @@
-MODEL_NAME = 'LSTMModel'
+MODEL_NAME = 'lstm_based_crack_forecaster'
 MODEL_FOLDER = 'models/' + MODEL_NAME + '/'
 MODEL_PATH = MODEL_FOLDER + MODEL_NAME + '_model.pkl'
 HYPERPARAMETERS_PATH = MODEL_FOLDER + MODEL_NAME + '_best_params.pkl'
 MIN_SEQUENCE_LENGTH = 2
 FORECAST_MONTHS = 6
-SUBMISSION_FOLDER = 'data/output/submission/lstm'
+SUBMISSION_FOLDER = 'data/output/submission/lstm_based_crack_forecaster'
 
 FEATURE_COLUMNS = [
     'time (months)',
