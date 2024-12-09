@@ -1,11 +1,9 @@
-
+import matplotlib.pyplot as plt
+import numpy as np
+import streamlit as st
+from tensorflow.keras import callbacks
 
 from src.forecasting.validation.display import DisplayData
-
-from tensorflow.keras import callbacks
-import matplotlib.pyplot as plt
-import streamlit as st
-import numpy as np
 
 
 class TrainingPlot(callbacks.Callback):

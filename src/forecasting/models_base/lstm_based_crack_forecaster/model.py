@@ -1,17 +1,15 @@
-#model.py
 import os
 import pickle
-
+import matplotlib.image as mpimg
+import matplotlib.pyplot as plt
 import numpy as np
 import streamlit as st
+import tensorflow as tf
+import visualkeras
+
 from tensorflow.keras.layers import LSTM, Dense, Masking, Input, Dropout, BatchNormalization
 from tensorflow.keras.models import Model
-from tensorflow.keras.metrics import AUC
 from tensorflow.keras.utils import plot_model
-import visualkeras
-import matplotlib.pyplot as plt
-import matplotlib.image as mpimg
-import tensorflow as tf
 
 from .configs import MIN_SEQUENCE_LENGTH, FORECAST_MONTHS, FEATURE_COLUMNS, MODEL_PATH, MODEL_FOLDER
 
