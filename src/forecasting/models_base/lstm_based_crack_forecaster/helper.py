@@ -120,6 +120,19 @@ def add_predictions_to_data(initial_data, min_sequence_length=MIN_SEQUENCE_LENGT
     feature_adder = FeatureAdder(min_sequence_length=min_sequence_length)
     df_extended = feature_adder.add_features(df_extended, particles_filtery=False)
 
+    # Binarization of classification outputs
+    columns_to_binarize = ['Infant mortality', 'Control board failure', 'Fatigue crack']
+    df_extended[columns_to_binarize] = (df_extended[columns_to_binarize] > 0.5).astype(int)
+
+    # Failure mode attribution
+    conditions = [
+        df_extended['Fatigue crack'] == 1,
+        df_extended['Control board failure'] == 1,
+        df_extended['Infant mortality'] == 1
+    ]
+    choices = ['Fatigue crack', 'Control board failure', 'Infant mortality']
+    df_extended['Failure mode'] = np.select(conditions, choices, default=None)
+
     # Verification
     columns_to_keep = [
         'item_id',

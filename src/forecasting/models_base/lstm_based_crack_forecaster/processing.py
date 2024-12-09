@@ -41,6 +41,8 @@ def prepare_sequences(data, mode, min_sequence_length=MIN_SEQUENCE_LENGTH, forec
         For 'train' mode: Tuple (sequences_padded, targets_dict)
         For 'test' mode: Numpy array of the test sequence.
     """
+    data.sort_values(by='item_id', inplace=True)
+
     if feature_columns is None:
         raise ValueError("feature_columns must be provided.")
 

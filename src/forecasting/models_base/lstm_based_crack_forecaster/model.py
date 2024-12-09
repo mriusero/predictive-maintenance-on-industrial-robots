@@ -4,13 +4,14 @@ import pickle
 
 import numpy as np
 import streamlit as st
-from tensorflow.keras.layers import LSTM, Dense, Input, Dropout, BatchNormalization
+from tensorflow.keras.layers import LSTM, Dense, Masking, Input, Dropout, BatchNormalization
 from tensorflow.keras.models import Model
 from tensorflow.keras.metrics import AUC
 from tensorflow.keras.utils import plot_model
 import visualkeras
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
+import tensorflow as tf
 
 from .configs import MIN_SEQUENCE_LENGTH, FORECAST_MONTHS, FEATURE_COLUMNS, MODEL_PATH, MODEL_FOLDER
 
@@ -31,27 +32,28 @@ class LSTMModel():
             model (tf.keras.Model): Compiled Keras model.
         """
         input_layer = Input(shape=input_shape, name="Input_Layer")
-        x = LSTM(64, return_sequences=False, name="LSTM_Layer_1")(input_layer)
-        x = BatchNormalization()(x)
-        x = Dropout(0.1)(x)
-
-        x = Dense(128, activation='relu', name="Dense_Layer_1")(x)
+        x = Masking(mask_value=0.0)(input_layer)
+        x = LSTM(64, return_sequences=True, name="LSTM_Layer_1")(x)
+        x = LSTM(128, return_sequences=False, name="LSTM_Layer_2")(x)
         x = BatchNormalization()(x)
         x = Dropout(0.2)(x)
 
-        x = LSTM(64, return_sequences=False, name="LSTM_Layer_2")(input_layer)
-        x = BatchNormalization()(x)
-        x = Dropout(0.1)(x)
+        # Branche pour length_filtered
+        x_length = Dense(64, activation='relu', kernel_regularizer=tf.keras.regularizers.l2(0.01))(x)
+        x_length = BatchNormalization()(x_length)
+        x_length = Dropout(0.2)(x_length)
+        x_length = Dense(32, activation='relu', kernel_regularizer=tf.keras.regularizers.l2(0.01))(x_length)
+        output_length_filtered = Dense(6, activation='sigmoid', name='length_filtered')(x_length)
+        output_length_measured = Dense(6, activation='sigmoid', name='length_measured')(x_length)
 
-        x = Dense(32, activation='relu', name="Dense_Layer_3")(x)
-        x = BatchNormalization()(x)
-
-        output_length_filtered = Dense(6, activation='relu', name='length_filtered')(x)     # Outputs for regression tasks
-        output_length_measured = Dense(6, activation='relu', name='length_measured')(x)
-
-        output_infant_mortality = Dense(6, activation='sigmoid', name='Infant_mortality')(x)                # Outputs for classification tasks
-        output_control_board_failure = Dense(6, activation='sigmoid', name='Control_board_failure')(x)
-        output_fatigue_crack = Dense(6, activation='sigmoid', name='Fatigue_crack')(x)
+        # Branche pour la classification
+        x_classification = Dense(64, activation='relu', kernel_regularizer=tf.keras.regularizers.l2(0.01))(x)
+        x_classification = BatchNormalization()(x_classification)
+        x_classification = Dropout(0.2)(x_classification)
+        x_classification = Dense(32, activation='relu', kernel_regularizer=tf.keras.regularizers.l2(0.01))(x_classification)
+        output_infant_mortality = Dense(6, activation='softmax', name='Infant_mortality')(x_classification)                # Outputs for classification tasks
+        output_control_board_failure = Dense(6, activation='softmax', name='Control_board_failure')(x_classification)
+        output_fatigue_crack = Dense(6, activation='softmax', name='Fatigue_crack')(x_classification)
 
         self.model = Model(
             inputs=input_layer,
@@ -78,6 +80,13 @@ class LSTMModel():
                 'Infant_mortality': ['accuracy'],
                 'Control_board_failure': ['accuracy'],
                 'Fatigue_crack': ['accuracy'],
+            },
+            loss_weights={
+                'length_filtered': 1.0,
+                'length_measured': 1.0,
+                'Infant_mortality': 1.0,
+                'Control_board_failure': 1.0,
+                'Fatigue_crack': 1.0,
             }
         )
         self.model.summary()
