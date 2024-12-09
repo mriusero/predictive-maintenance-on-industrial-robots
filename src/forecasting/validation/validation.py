@@ -8,9 +8,11 @@ def generate_submission_file(model_name, submission_path, step):
     submission_df['label'] = 0
     submission_df['predicted_rul'] = 0
 
-    if model_name == 'LSTMModel':
 
-        lstm_results = pd.read_csv(f"{submission_path}/lstm_predictions_.csv")
+
+    if model_name == 'lstm_based_crack_forecaster':
+
+        lstm_results = pd.read_csv(f"{submission_path}/lstm_predictions_{step}.csv")
         lstm_results = lstm_results[['item_id',
                                    #  'Infant mortality', 'Control board failure', 'Fatigue crack',
                                      'length_measured', 'length_filtered']]

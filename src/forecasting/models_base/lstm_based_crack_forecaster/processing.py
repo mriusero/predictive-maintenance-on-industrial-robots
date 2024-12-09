@@ -2,82 +2,93 @@ import numpy as np
 
 from tensorflow.keras.preprocessing.sequence import pad_sequences
 
-def prepare_train_sequences(df, min_sequence_length=2, forecast_months=6):
-    item_indices = df['item_id'].unique()
-    sequences = []
-    targets_filtered = []
-    targets_measured = []
-
-    for item_index in item_indices:
-        item_data = df[df['item_id'] == item_index].sort_values(by='time (months)')
-
-        # Print the columns being used for sequence preparation
-        print(f"Preparing training sequences for item_id: {item_index}")
-        print("Columns used:", item_data.columns.tolist())
-
-        times = item_data['time (months)'].values
-        lengths_filtered = item_data['length_filtered'].values
-        lengths_measured = item_data['length_measured'].values
-        rolling_means_filtered = item_data['rolling_mean_length_filtered'].values
-        rolling_stds_filtered = item_data['rolling_std_length_filtered'].values
-        rolling_maxs_filtered = item_data['rolling_max_length_filtered'].values
-        rolling_mins_filtered = item_data['rolling_min_length_filtered'].values
-        # rolling_means_measured = item_data['rolling_mean_length_measured'].values
-        # rolling_stds_measured = item_data['rolling_std_length_measured'].values
-        # rolling_maxs_measured = item_data['rolling_max_length_measured'].values
-        # rolling_mins_measured = item_data['rolling_min_length_measured'].values
-
-        print(f"item_id: {item_index}, Length of data: {len(times)}")
-
-        sequence_length = min_sequence_length
-
-        for i in range(len(times) - sequence_length - forecast_months + 1):
-            seq = np.column_stack((
-                times[i:i + sequence_length],
-                lengths_filtered[i:i + sequence_length],
-                lengths_measured[i:i + sequence_length],
-                rolling_means_filtered[i:i + sequence_length],
-                rolling_stds_filtered[i:i + sequence_length],
-                rolling_maxs_filtered[i:i + sequence_length],
-                rolling_mins_filtered[i:i + sequence_length],
-                #      rolling_means_measured[i:i + sequence_length],
-                #      rolling_stds_measured[i:i + sequence_length],
-                #      rolling_maxs_measured[i:i + sequence_length],
-                #      rolling_mins_measured[i:i + sequence_length]
-            ))
-            sequences.append(seq)
-
-            target_filtered = lengths_filtered[i + sequence_length:i + sequence_length + forecast_months]
-            target_measured = lengths_measured[i + sequence_length:i + sequence_length + forecast_months]
-
-            targets_filtered.append(target_filtered)
-            targets_measured.append(target_measured)
-
-    if len(sequences) == 0:
-        raise ValueError("No valid sequence was created with the provided data.")
-
-    sequences_padded = np.array(
-        pad_sequences(sequences, maxlen=min_sequence_length, padding='post', dtype='float32'))
-
-    targets_filtered = np.array(targets_filtered).reshape(-1, forecast_months)
-    targets_measured = np.array(targets_measured).reshape(-1, forecast_months)
-
-    return sequences_padded, {'lengths_filtered_output': targets_filtered,
-                              'lengths_measured_output': targets_measured}
+from .configs import MIN_SEQUENCE_LENGTH, FORECAST_MONTHS, FEATURE_COLUMNS, TARGET_COLUMNS
 
 
-def prepare_test_sequence(features, min_sequence_length=2):
-    last_sequence = np.column_stack((
-        features['times'][-min_sequence_length:],
-        features['length_filtered'][-min_sequence_length:],
-        features['length_measured'][-min_sequence_length:],
-        features['rolling_means_filtered'][-min_sequence_length:],
-        features['rolling_stds_filtered'][-min_sequence_length:],
-        features['rolling_maxs_filtered'][-min_sequence_length:],
-        features['rolling_mins_filtered'][-min_sequence_length:],
-        #   features['rolling_means_measured'][-self.min_sequence_length:],
-        #   features['rolling_stds_measured'][-self.min_sequence_length:],
-        #   features['rolling_maxs_measured'][-self.min_sequence_length:],
-        #   features['rolling_mins_measured'][-self.min_sequence_length:]
-    ))
-    return pad_sequences([last_sequence], maxlen=min_sequence_length, padding='post', dtype='float32')
+def extract_features(data, feature_columns, start_index, end_index):
+    """
+    Extracts the specified features for a given range from the data.
+    Parameters:
+        data: pd.DataFrame or dict, the data to extract features from.
+        feature_columns: list of str, the columns to extract.
+        start_index: int, start index for slicing.
+        end_index: int, end index for slicing.
+    Returns:
+        A numpy array of extracted features.
+    """
+    if isinstance(data, dict):  # For test mode with dictionary input
+        return np.column_stack([
+            data[col][start_index:end_index] for col in feature_columns
+        ])
+    else:  # For train mode with DataFrame input
+        return np.column_stack([
+            data[col].values[start_index:end_index] for col in feature_columns
+        ])
+
+
+def prepare_sequences(data, mode, min_sequence_length=MIN_SEQUENCE_LENGTH, forecast_months=FORECAST_MONTHS,
+                      feature_columns=FEATURE_COLUMNS, target_columns=TARGET_COLUMNS):
+    """
+    Prepares sequences for training or testing.
+    Parameters:
+        data: pd.DataFrame or dict, the input data.
+        mode: str, either 'train' or 'test'.
+        min_sequence_length: int, minimum length of input sequences.
+        forecast_months: int, number of months to forecast (only for 'train' mode).
+        feature_columns: list of str, columns to include in the feature sequences.
+        target_columns: list of str, columns to use as targets (only for 'train' mode).
+    Returns:
+        For 'train' mode: Tuple (sequences_padded, targets_dict)
+        For 'test' mode: Numpy array of the test sequence.
+    """
+    data.sort_values(by='item_id', inplace=True)
+
+    if feature_columns is None:
+        raise ValueError("feature_columns must be provided.")
+
+    if mode == 'train':
+        if target_columns is None:
+            raise ValueError("target_columns must be provided in 'train' mode.")
+
+        item_indices = data['item_id'].unique()
+        sequences = []
+        targets = {col: [] for col in target_columns}
+
+        for item_index in item_indices:
+
+            item_data = data[data['item_id'] == item_index].sort_values(by='time (months)')     # Select and sort data for the current item
+            num_rows = len(item_data)
+
+            for i in range(num_rows - min_sequence_length - forecast_months + 1):
+
+                seq = extract_features(item_data, feature_columns, i, i + min_sequence_length)      # Extract sequence features
+                sequences.append(seq)
+
+                for col in target_columns:      # Extract targets for forecast
+                    target = item_data[col].values[i + min_sequence_length:i + min_sequence_length + forecast_months]
+                    targets[col].append(target)
+
+        if not sequences:
+            raise ValueError("No valid sequence was created with the provided data.")
+
+        sequences_padded = np.array(
+            pad_sequences(sequences, maxlen=min_sequence_length, padding='post', dtype='float32')
+        )
+        targets_dict = {
+            col: np.array(values).reshape(-1, forecast_months) for col, values in targets.items()
+        }
+        print(f"Shape of X: {sequences_padded.shape}")  # (nb_sequences, min_sequence_length, nb_features)
+        for key, value in targets_dict.items():
+            print(f"Shape of Y[{key}]: {value.shape}")  # (nb_sequences, forecast_months)
+
+        return sequences_padded, targets_dict
+
+
+    elif mode == 'test':        # Extract the sequence for testing
+
+        sequence = extract_features(data, feature_columns, -min_sequence_length, None)
+        return pad_sequences(
+            [sequence], maxlen=min_sequence_length, padding='post', dtype='float32'
+        )
+    else:
+        raise ValueError("Invalid mode. Choose either 'train' or 'test'.")

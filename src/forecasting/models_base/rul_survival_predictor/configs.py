@@ -8,10 +8,12 @@ SELECTED_VARIABLES = ["source", "item_id", "time (months)", "label",            
                       "Infant mortality", "Control board failure", "Fatigue crack",     # "Failure mode"
                       "Time to failure (months)", "rul (months)", "failure_month",      # "true_rul",
                       "length_filtered", "beta0", "beta1", "beta2",
+
                       "rolling_mean_time (months)", "static_mean_time (months)",
                       "rolling_std_time (months)", "static_std_time (months)",
                       "rolling_max_time (months)", "static_max_time (months)",
                       "rolling_min_time (months)", "static_min_time (months)",
+
                       "rolling_mean_length_filtered", "static_mean_length_filtered",
                       "rolling_std_length_filtered", "static_std_length_filtered",
                       "rolling_max_length_filtered", "static_max_length_filtered",
