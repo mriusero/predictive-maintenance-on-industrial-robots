@@ -8,4 +8,6 @@ def page_4():
     Here is the page dedicated to the second phase of the project.
     """)
 
+    st.image(f'models/lstm_based_crack_forecaster/model_visualization.png', caption="Model architecture", use_column_width=True)
+
     handle_phase_two()

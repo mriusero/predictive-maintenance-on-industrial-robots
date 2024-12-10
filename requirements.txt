@@ -24,3 +24,5 @@ filterpy==1.4.5
 
 # Deep Learning
 tensorflow==2.16.2
+visualkeras==0.1.4
+pydot==3.0.3
