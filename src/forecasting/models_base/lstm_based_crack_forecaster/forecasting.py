@@ -24,7 +24,7 @@ def predict_future_values(model, df, output_file_path=None):
 
     with st.spinner('Calculating future values...'):
         for item_index in item_indices:
-            item_data = df[df['item_id'] == item_index].sort_values(by='time (months)')  # Filter and sort data for the current item
+            item_data = df[df['item_id'] == item_index].sort_values(by='time (months)')     # Filter and sort data for the current item
 
             last_sequence_padded = prepare_sequences(           # Prepare the last sequence for prediction
                 data=item_data,

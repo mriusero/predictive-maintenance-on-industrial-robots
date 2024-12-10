@@ -1,13 +1,15 @@
-from .configs import MODEL_PATH, MODEL_FOLDER
-from .evaluation import display_results, TrainingPlot
+from .configs import MODEL_PATH, MODEL_FOLDER, HYPERPARAMETERS_PATH, LOG_PATH
+from .evaluation import display_results
+from .callbacks import TrainingPlot
 from .forecasting import predict_future_values
 from .helper import add_predictions_to_data
 from .model import LSTMModel
 from .processing import prepare_sequences
 
+
 from tensorflow.keras.callbacks import EarlyStopping, ReduceLROnPlateau
 
-def lstm_training_pipeline(train_df, pseudo_test_with_truth_df, optimize=False):
+def lstm_training_pipeline(train_df, optimize=False):
     """
     Function that runs the training pipeline for the LSTM crack growth forecast model.
     """
@@ -23,8 +25,7 @@ def lstm_training_pipeline(train_df, pseudo_test_with_truth_df, optimize=False):
     # Callbacks
     earlystop = EarlyStopping(monitor='val_loss', patience=5, restore_best_weights=False)
     reduce_lr = ReduceLROnPlateau(monitor='val_loss', factor=0.5, patience=5)
-    output_names = ['length_filtered', 'length_measured', 'Infant_mortality', 'Control_board_failure', 'Fatigue_crack']
-    plot_losses = TrainingPlot(output_names=output_names)
+    plot_losses = TrainingPlot(['length_filtered', 'length_measured', 'Infant_mortality', 'Control_board_failure', 'Fatigue_crack'])
 
     # Training
     lstm.train(
@@ -32,9 +33,12 @@ def lstm_training_pipeline(train_df, pseudo_test_with_truth_df, optimize=False):
         epochs=100,
         batch_size=32,
         validation_split=0.3,
-        callbacks=[plot_losses, earlystop, reduce_lr]
+        callbacks=[plot_losses, earlystop, reduce_lr],
+        optimize=optimize,
+        n_trials=50,
+        params_path=HYPERPARAMETERS_PATH,
+        log_path=LOG_PATH
     )
-
 
 def lstm_validation_pipeline(train_df, pseudo_test_with_truth_df, optimize=False):
     """
