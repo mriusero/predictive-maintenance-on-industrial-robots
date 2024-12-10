@@ -4,6 +4,7 @@ import pickle
 import numpy as np
 import streamlit as st
 import tensorflow as tf
+from keras.src.layers import BatchNormalization
 from tensorflow.keras.layers import (
     LSTM,
     Dense,
@@ -58,6 +59,7 @@ class LSTMModel:
 
         # Dense layers for regression branch
         x_reg = Dense(256, activation='elu', kernel_regularizer=l2(0.01))(x)
+        x_reg = BatchNormalization()(x_reg)
         x_reg = Dropout(0.3)(x_reg)
         x_reg = Dense(128, activation='elu', kernel_regularizer=l2(0.01))(x_reg)
         x_reg = Dropout(0.2)(x_reg)
@@ -68,11 +70,12 @@ class LSTMModel:
         x_reg = Dense(16, activation='elu', kernel_regularizer=l2(0.005))(x_reg)
         x_reg = Dropout(0.1)(x_reg)
 
-        output_length_filtered = Dense(6, activation='sigmoid', name='length_filtered')(x_reg)
-        output_length_measured = Dense(6, activation='sigmoid', name='length_measured')(x_reg)
+        output_length_filtered = Dense(6, activation='relu', name='length_filtered')(x_reg)
+        output_length_measured = Dense(6, activation='relu', name='length_measured')(x_reg)
 
         # Dense layers for classification branch
         x_class = Dense(256, activation='elu', kernel_regularizer=l2(0.01))(x)
+        x_class = BatchNormalization()(x_class)
         x_class = Dropout(0.3)(x_class)
         x_class = Dense(128, activation='elu', kernel_regularizer=l2(0.01))(x_class)
         x_class = Dropout(0.3)(x_class)
@@ -83,9 +86,9 @@ class LSTMModel:
         x_class = Dense(16, activation='elu', kernel_regularizer=l2(0.005))(x_class)
         x_class = Dropout(0.1)(x_class)
 
-        output_infant_mortality = Dense(6, activation='sigmoid', name='Infant_mortality')(x_class)
-        output_control_board_failure = Dense(6, activation='sigmoid', name='Control_board_failure')(x_class)
-        output_fatigue_crack = Dense(6, activation='sigmoid', name='Fatigue_crack')(x_class)
+        output_infant_mortality = Dense(6, activation='softmax', name='Infant_mortality')(x_class)
+        output_control_board_failure = Dense(6, activation='softmax', name='Control_board_failure')(x_class)
+        output_fatigue_crack = Dense(6, activation='softmax', name='Fatigue_crack')(x_class)
 
         # Compile final model
         self.model = Model(

@@ -6,6 +6,8 @@ import pickle
 import traceback
 import tensorflow as tf
 
+from .evaluation import generate_model_images
+from .configs import MODEL_FOLDER
 
 def optimize_hyperparameters(lstm, x_, y_, n_trials=50, path="best_params.pkl", log_path="study_logs.json"):
     """
@@ -53,10 +55,13 @@ def optimize_hyperparameters(lstm, x_, y_, n_trials=50, path="best_params.pkl", 
                 'length_filtered': 1.0,
                 'length_measured': 1.0,
                 'Infant_mortality': 1.0,
-                'Control_board_failure': 1.0,
+                'Control_board_failure': 1.5,
                 'Fatigue_crack': 1.0,
             }
         )
+
+        generate_model_images(lstm.model, MODEL_FOLDER)
+
         early_stopping = tf.keras.callbacks.EarlyStopping(                  # Implement early stopping
             monitor='val_loss', patience=5, restore_best_weights=True
         )

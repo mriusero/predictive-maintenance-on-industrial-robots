@@ -45,7 +45,9 @@ def generate_model_images(model, MODEL_FOLDER):
         axs[1].axis('off')
         axs[1].set_title('Stylized Model')
 
-        st.pyplot(fig)
+        plt.tight_layout()
+        fig.savefig(f'{MODEL_FOLDER}/model_visualization.png', bbox_inches='tight', dpi=300)
+        #st.pyplot(fig)
 
     except Exception as e:
         st.error('Error while generating model architecture images. '

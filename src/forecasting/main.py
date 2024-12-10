@@ -46,7 +46,7 @@ def handle_phase_two():
     # Run pipeline phase II (TRAINING)
     if st.button('Run training phase II'):
         os.system('clear')
-        lstm_training_pipeline(train_df, pseudo_test_with_truth_df, optimize=optimize)
+        lstm_training_pipeline(train_df, optimize=optimize)
 
     # Run pipeline phase II (VALIDATION)
     if st.button('Run validation phase II'):
