@@ -1,10 +1,11 @@
-import streamlit as st
 import matplotlib.pyplot as plt
+import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
-from statsmodels.tsa.seasonal import STL
 import seaborn as sns
-import pandas as pd
+import streamlit as st
+from statsmodels.tsa.seasonal import STL
+
 from src.forecasting import clean_data, FeatureAdder
 from ..core import dataframing_data
 

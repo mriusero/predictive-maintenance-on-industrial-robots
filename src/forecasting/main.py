@@ -3,7 +3,9 @@ import os
 
 import streamlit as st
 
-from .models_base.lstm_based_crack_forecaster.pipeline import lstm_training_pipeline, lstm_validation_pipeline, lstm_testing_pipeline
+from .models_base.fleet_management_predictor.pipeline import fleet_management_pipeline
+from .models_base.lstm_based_crack_forecaster.pipeline import lstm_training_pipeline, lstm_validation_pipeline, \
+    lstm_testing_pipeline
 from .models_base.rul_survival_predictor.pipeline import survival_predictor_training, survival_predictor_prediction
 
 
@@ -57,3 +59,10 @@ def handle_phase_two():
     if st.button('Run predictions phase II'):
         os.system('clear')
         lstm_testing_pipeline(train_df, test_df, optimize=optimize)
+
+def handle_fleet_management():
+    """
+    Model management function that runs the pipeline for the fleet management.
+    """
+    train_df, pseudo_test_with_truth_df, test_df = get_data()  # Load dataframes
+    fleet_management_pipeline(train_df, pseudo_test_with_truth_df, test_df)

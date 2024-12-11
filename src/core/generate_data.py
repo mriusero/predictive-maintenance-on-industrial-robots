@@ -1,6 +1,7 @@
 import os
-import pandas as pd
 import random
+
+import pandas as pd
 
 
 def generate_pseudo_testing_data(directory: str, directory_truth: str):
