@@ -1,13 +1,13 @@
+from tensorflow.keras.callbacks import EarlyStopping, ReduceLROnPlateau
+
+from .callbacks import TrainingPlot
 from .configs import MODEL_PATH, MODEL_FOLDER, HYPERPARAMETERS_PATH, LOG_PATH
 from .evaluation import display_results
-from .callbacks import TrainingPlot
 from .forecasting import predict_future_values
 from .helper import add_predictions_to_data
 from .model import LSTMModel
 from .processing import prepare_sequences
 
-
-from tensorflow.keras.callbacks import EarlyStopping, ReduceLROnPlateau
 
 def lstm_training_pipeline(train_df, optimize=False):
     """

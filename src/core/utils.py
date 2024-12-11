@@ -1,15 +1,14 @@
-import pandas as pd
+import gc
 import os
 import re
-import glob
 from datetime import datetime
-import gc
+
+import pandas as pd
 
 
 def load_data():
     """
     Loads multiple datasets from various CSV files and merges them into a unified dataset.
-
     :return: str: A message indicating that the data has been successfully generated.
     """
     # Load failure data
@@ -86,7 +85,6 @@ def load_data():
 def merge_data(training_data):
     """
     Merges various datasets into a final dataset and saves them to CSV files.
-
     :param training_data: dict: Dictionary containing the datasets to merge.
     :return: str: A message indicating the successful generation of new data.
     """
@@ -129,7 +127,6 @@ def merge_data(training_data):
 def dataframing_data():
     """
     Reads and loads all processed datasets into DataFrames.
-
     :return: dict: A dictionary containing all the loaded DataFrames.
     """
     paths = {
@@ -150,7 +147,6 @@ def dataframing_data():
 def load_failures():
     """
     Loads failure modes for all items from the training dataset.
-
     :return: pd.DataFrame: DataFrame containing the item_id and its corresponding failure mode.
     :raises ValueError: If 'item_id' or 'Failure mode' columns are missing from the data.
     """
@@ -160,46 +156,6 @@ def load_failures():
     df = df.groupby('item_id')['Failure mode'].first().reset_index()
     failures_df = df.rename(columns={'Failure mode': 'Failure mode'})
     return failures_df
-
-
-def detect_outliers(df: pd.DataFrame) -> pd.DataFrame:
-    """
-    Detects outliers in a DataFrame based on the IQR method.
-
-    :param df: pd.DataFrame: The DataFrame to analyze.
-    :return: pd.DataFrame: DataFrame containing the detected outliers.
-    """
-    outliers_list = []
-    for column in df.select_dtypes(include=['number']).columns:
-        Q1 = df[column].quantile(0.25)
-        Q3 = df[column].quantile(0.75)
-        IQR = Q3 - Q1
-        outlier_mask = (df[column] < (Q1 - 1.5 * IQR)) | (df[column] > (Q3 + 1.5 * IQR))
-        outliers = df[outlier_mask].copy()
-        if not outliers.empty:
-            outliers['outlier_column'] = column
-            outliers['outlier_type'] = 'High'  # Possible extension: could also mark 'Low' for lower outliers
-            outliers_list.append(outliers)
-
-    if outliers_list:
-        all_outliers_df = pd.concat(outliers_list)
-        return all_outliers_df
-    else:
-        return pd.DataFrame(columns=df.columns.tolist() + ['outlier_column', 'outlier_type'])
-
-
-def combine_submissions_for_scenario(folder_path):
-    """
-    Combines multiple CSV submissions for a given scenario into a single file.
-
-    :param folder_path: str: The folder containing CSV files to combine.
-    """
-    file_paths = glob.glob(os.path.join(folder_path, '*.csv'))
-    dfs = [pd.read_csv(file) for file in file_paths]
-    combined_df = pd.concat(dfs)
-    final_df = combined_df.groupby('item_index').agg({'predicted_rul': 'max'}).reset_index()
-    output_file = os.path.join(folder_path, 'Submission.csv')
-    final_df.to_csv(output_file, index=False)
 
 
 def display_variable_types(df):
@@ -234,25 +190,3 @@ def display_variable_types(df):
         results['Type'].append(var_type)
 
     return pd.DataFrame(results)
-
-
-def compare_dataframes(df1, df2):
-    """
-    Compares two DataFrames and displays the differences in columns and values.
-
-    :param df1: pd.DataFrame: First DataFrame to compare.
-    :param df2: pd.DataFrame: Second DataFrame to compare.
-    """
-    cols_diff = set(df1.columns).symmetric_difference(set(df2.columns))
-    if cols_diff:
-        print("Different columns:")
-        print(cols_diff)
-    else:
-        print("Both DataFrames have the same columns.")
-
-    diff = df1.compare(df2, keep_shape=True, keep_equal=True)
-    if diff.empty:
-        print("Both DataFrames are identical in terms of values.")
-    else:
-        print("Differences in values:")
-        print(diff)

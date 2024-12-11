@@ -5,7 +5,7 @@ import pandas as pd
 import streamlit as st
 
 from src.forecasting.models_base.rul_survival_predictor.configs import MODEL_NAME, SUBMISSION_FOLDER, MODEL_PATH
-from src.forecasting.validation.validation import generate_submission_file, calculate_score
+from src.forecasting.validation.validation import generate_submission_file
 from .evaluation import display_results
 from .helper import SELECTED_VARIABLES, analyze
 from .model import GradientBoostingSurvivalModel
@@ -142,6 +142,3 @@ def survival_predictor_prediction(train_df: pd.DataFrame, test_df: pd.DataFrame)
 
     # Calculate Final Score
     log_step("Calculating final score...")
-    final_score = calculate_score(model_name=MODEL_NAME, submission_path=SUBMISSION_FOLDER, step=step)
-    log_step(f"Final score calculated: {final_score}", completed=True)
-    st.write(f"Final score: `{final_score}`")

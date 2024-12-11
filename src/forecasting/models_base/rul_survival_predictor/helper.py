@@ -1,8 +1,7 @@
 import pandas as pd
-import streamlit as st
 
 from src.forecasting.models_base.rul_survival_predictor.configs import SELECTED_VARIABLES
-from src.forecasting.validation.validation import generate_submission_file, calculate_score
+from src.forecasting.validation.validation import generate_submission_file
 
 
 def select_variables(df):
@@ -64,7 +63,6 @@ def analyze(
 
     model.save_predictions(model_name, submission_path, step, predictions_merged)   # Save predictions
     generate_submission_file(model_name, submission_path, step)                     # Generate submission file
-    score = calculate_score(model_name, submission_path, step)                      # Calculate score
-    st.write(f"Validation score for {step}: `{score}`")
+
 
     return predictions_merged

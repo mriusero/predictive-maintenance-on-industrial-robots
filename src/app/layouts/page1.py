@@ -1,9 +1,9 @@
-import streamlit as st
-import pandas as pd
 import numpy as np
+import pandas as pd
+import streamlit as st
 
-from src.forecasting import run_statistical_test
 from src.core import display_variable_types
+from src.forecasting import run_statistical_test
 
 
 def page_1():

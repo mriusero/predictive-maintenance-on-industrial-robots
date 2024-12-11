@@ -1,10 +1,10 @@
-import pandas as pd
 import numpy as np
+import pandas as pd
 import streamlit as st
-from scipy.stats import shapiro, ttest_ind, mannwhitneyu, f_oneway, chi2_contingency, pearsonr, wilcoxon, friedmanchisquare
-from statsmodels.stats.anova import AnovaRM
-from statsmodels.regression.mixed_linear_model import MixedLM
+from scipy.stats import shapiro, ttest_ind, mannwhitneyu, f_oneway, chi2_contingency, pearsonr, wilcoxon, \
+    friedmanchisquare
 from statsmodels.stats.outliers_influence import variance_inflation_factor
+
 
 class StatisticalTests:
     def __init__(self, df):

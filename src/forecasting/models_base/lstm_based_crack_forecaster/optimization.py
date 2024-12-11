@@ -1,13 +1,15 @@
-import numpy as np
-import optuna
-import os
 import json
+import os
 import pickle
 import traceback
+
+import numpy as np
+import optuna
 import tensorflow as tf
 
-from .evaluation import generate_model_images
 from .configs import MODEL_FOLDER
+from .evaluation import generate_model_images
+
 
 def optimize_hyperparameters(lstm, x_, y_, n_trials=50, path="best_params.pkl", log_path="study_logs.json"):
     """
