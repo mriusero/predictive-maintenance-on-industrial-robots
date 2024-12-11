@@ -38,6 +38,9 @@ def generate_pseudo_testing_data_with_truth(directory: str, directory_student: s
     :param directory: Path to the directory containing the pseudo-testing data.
     :param directory_student: Path to the directory where filtered data will be saved.
     """
+
+
+
     if not os.path.exists(directory_student):
         os.makedirs(directory_student)                                   # Create output directory if it does not exist
 
