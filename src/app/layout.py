@@ -29,9 +29,9 @@ def app_layout():
     page = st.sidebar.radio("Project_", ["#0 Introduction_",
                                          "#1 Exploration_",
                                          "#2 Feature Engineering_",
-                                         "#3 Phase I_",
-                                         "#4 Phase II_",
-                                         "#5 Empty_",
+                                         "#3 Phase I: Survival Prediction_",
+                                         "#4 Phase II: Length Forecasting_",
+                                         "#5 Fleet Management_",
                                          "#6 Empty_",
                                          ])
     # -- LAYOUT --
@@ -95,11 +95,11 @@ def app_layout():
         page_1()
     elif page == "#2 Feature Engineering_":
         page_2()
-    elif page == "#3 Phase I_":
+    elif page == "#3 Phase I: Survival Prediction_":
         page_3()
-    elif page == "#4 Phase II_":
+    elif page == "#4 Phase II: Length Forecasting_":
         page_4()
-    elif page == "#5 Empty_":
+    elif page == "#5 Fleet Management_":
         page_5()
     elif page == "#6 Empty_":
         page_6()
