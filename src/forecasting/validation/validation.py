@@ -34,6 +34,8 @@ def generate_submission_file(model_name, submission_path, step):
     else:
         raise ValueError("'model_name' not defined in 'generate_submission_file()'")
 
-    submission_path = os.path.abspath(submission_path)
-    print('Submission file available at:', f"file://{submission_path}/submission_{step}.csv")
+    if step == 'phase-1':
+        submission_path = os.path.abspath(submission_path)
+        print('Submission file available at:', f"file://{submission_path}/submission_{step}.csv")
+
     return submission_df.sort_values('item_index').to_csv(f"{submission_path}/submission_{step}.csv", index=False)
