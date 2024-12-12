@@ -19,13 +19,13 @@ def calculate_combined_metrics(all_y_true, all_y_pred):
         dict: Dictionary containing the global metrics.
     """
     metrics = {
-        'precision_weighted': precision_score(all_y_true, all_y_pred, average='weighted'),
-        'recall_weighted': recall_score(all_y_true, all_y_pred, average='weighted'),
-        'f1_weighted': f1_score(all_y_true, all_y_pred, average='weighted'),
+        'precision_weighted': precision_score(all_y_true, all_y_pred, average='weighted', zero_division=1),
+        'recall_weighted': recall_score(all_y_true, all_y_pred, average='weighted', zero_division=1),
+        'f1_weighted': f1_score(all_y_true, all_y_pred, average='weighted', zero_division=1),
         'accuracy': accuracy_score(all_y_true, all_y_pred),
-        'precision_macro': precision_score(all_y_true, all_y_pred, average='macro'),
-        'recall_macro': recall_score(all_y_true, all_y_pred, average='macro'),
-        'f1_macro': f1_score(all_y_true, all_y_pred, average='macro'),
+        'precision_macro': precision_score(all_y_true, all_y_pred, average='macro', zero_division=1),
+        'recall_macro': recall_score(all_y_true, all_y_pred, average='macro', zero_division=1),
+        'f1_macro': f1_score(all_y_true, all_y_pred, average='macro', zero_division=1),
     }
     return metrics
 

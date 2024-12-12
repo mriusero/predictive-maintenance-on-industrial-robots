@@ -14,6 +14,8 @@ from sklearn.preprocessing import StandardScaler
 from imblearn.over_sampling import SMOTE
 from sklearn.utils import resample
 
+from src.forecasting.models_base.rul_survival_predictor.configs import NUMERICAL_FEATURES
+
 
 def normalize_data(df: pd.DataFrame, numerical_columns: List[str]) -> pd.DataFrame:
     """
@@ -59,7 +61,7 @@ def process_data(df: pd.DataFrame) -> pd.DataFrame:
     df = feature_adder.add_features(clean_data(df), particles_filtery=True, verbose=False)
     df = normalize_data(
         df=df,
-        numerical_columns=['length_measured', 'length_filtered']
+        numerical_columns=NUMERICAL_FEATURES
     )
     return df
 

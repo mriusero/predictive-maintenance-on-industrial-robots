@@ -1,6 +1,6 @@
 import streamlit as st
 
-from src.forecasting.main import handle_fleet_management
+#from src.forecasting.main import handle_fleet_management
 
 
 def page_5():
@@ -67,4 +67,4 @@ def page_5():
     """)
 
 
-    handle_fleet_management()
+   # handle_fleet_management()

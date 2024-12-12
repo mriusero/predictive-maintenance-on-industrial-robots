@@ -3,7 +3,7 @@ __pycache__/
 *.pyc
 *.pyo
 *.pyd
-*.pkl
+
 
 # Caches and temporary files
 .mypy_cache/
@@ -11,6 +11,7 @@ __pycache__/
 .cache/
 *.log
 *.tmp
+*error_log.json
 
 # Virtual environments
 venv/

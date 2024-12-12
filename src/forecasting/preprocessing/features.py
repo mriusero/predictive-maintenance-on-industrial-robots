@@ -99,7 +99,7 @@ class FeatureAdder:
             df.drop(columns=[col for col in to_recall if col in df.columns], inplace=True)
 
         # Calculate rolling and static features for specific columns
-        for col in ['time (months)', 'length_filtered']:
+        for col in ['time (months)', 'length_filtered', 'length_measured']:
             rolling_mean, rolling_std, rolling_max, rolling_min = calculate_rolling_features(df, col,
                                                                                              self.min_sequence_length)
             static_mean, static_std, static_max, static_min = calculate_static_features(df, col)
@@ -144,7 +144,7 @@ class FeatureAdder:
             df.fillna(0, inplace=True)
             return df
 
-        shift_columns = ['length_filtered']                 # Add shifts and ratios for 'length_filtered' column
+        shift_columns = ['length_filtered', 'length_measured']                 # Add shifts and ratios for 'length_filtered' column
         df = add_shifts_and_ratios(df, shift_columns)
 
         def decompose_time_series(df, time_col, value_col, period=12):

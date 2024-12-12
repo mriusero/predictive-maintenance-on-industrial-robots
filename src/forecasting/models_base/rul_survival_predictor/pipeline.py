@@ -27,14 +27,20 @@ def survival_predictor_pipeline(optimize: bool):
     print("-" * 60)
     data = prepare_data(
         selected_variables=SELECTED_VARIABLES,
-        n_validation_sets=N_VAL_SETS
+        n_validation_sets=N_VAL_SETS,
+        balance_classes_flag=True
     )
 
     print('\n2. Model Training')
     print("-" * 60)
     model = GradientBoostingSurvivalModel()
     if optimize or (model.best_params is None):
-        model.best_params = optimize_hyperparameters(data['x_train'],data['y_train'])
+        model.best_params = optimize_hyperparameters(
+            data['x_train'],data['y_train'],
+            data['validation_data'],
+            percentile=0.5,
+            n_trials=100
+        )
         st.success("Hyperparameters have been optimized and saved.")
     model.train(data['x_train'], data['y_train'])
 
@@ -62,6 +68,8 @@ def survival_predictor_pipeline(optimize: bool):
             model_name=MODEL_NAME,
             step=f'cross-val_{i+1}'
         )
+        val_predictions_merged = val_predictions_merged.dropna(subset=['label_y'])  # Drop NaNs of true values following class balancing to evaluate reality
+
         y_true = val_predictions_merged['label_y'].values
         y_pred = val_predictions_merged['predicted_failure_6_months_binary'].values
 
