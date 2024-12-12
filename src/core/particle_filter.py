@@ -13,10 +13,11 @@ class ParticleFilter:
     :param measurement_noise: Measurement noise standard deviation for observations.
     """
 
-    def __init__(self, num_particles=1000, process_noise=None, measurement_noise=0.05):
+    def __init__(self, num_particles=1000, process_noise=None, measurement_noise=0.05, verbose=True):
         self.num_particles = num_particles
         self.process_noise = np.array(process_noise or [0.01, 0.001, 0.01])
         self.measurement_noise = measurement_noise
+        self.verbose = verbose
 
     def initialize_particles(self, beta0_range, beta1_range, beta2_range):
         """
@@ -84,32 +85,51 @@ class ParticleFilter:
         """
         filtered_data = []
         num_items = len(df['item_id'].unique())
-        progress_bar = st.progress(0)
+        progress_bar = st.progress(0) if self.verbose else None
 
-        with st.spinner('Particles filtering...'):
+        if self.verbose:
+            with st.spinner('Particles filtering...'):
+                for i, item_index in enumerate(df['item_id'].unique()):
+                    filtered_data.extend(self._process_item(df, item_index, beta0_range, beta1_range, beta2_range))
+                    if self.verbose:
+                        progress = (i + 1) / num_items
+                        progress_bar.progress(progress)
+        else:
             for i, item_index in enumerate(df['item_id'].unique()):
-                df_item = df[df['item_id'] == item_index]
-                particles = self.initialize_particles(beta0_range, beta1_range, beta2_range)
-
-                for _, row in df_item.iterrows():
-                    time = row['time (months)']
-                    observation = row['length_measured']
-
-                    particles = self.propagate_particles(particles)                 # Particle propagation, weight computation, and resampling
-                    weights = self.compute_weights(particles, observation, time)
-                    particles = self.resample_particles(particles, weights)
-
-
-                    estimated_state = np.mean(particles, axis=0)                    # Estimate the mean state and crack length
-                    estimated_crack_length = estimated_state[2] / (
-                                1 + np.exp(-(estimated_state[0] + estimated_state[1] * time)))
-
-                    filtered_data.append(row.tolist() + [estimated_crack_length] + estimated_state.tolist())        # Append filtered data
-
-                progress = (i + 1) / num_items      # Update progress bar
-                progress_bar.progress(progress)
+                filtered_data.extend(self._process_item(df, item_index, beta0_range, beta1_range, beta2_range))
 
         column_names = df.columns.tolist() + ['length_filtered', 'beta0', 'beta1', 'beta2']
         filtered_df = pd.DataFrame(filtered_data, columns=column_names)
 
         return filtered_df
+
+    def _process_item(self, df, item_index, beta0_range, beta1_range, beta2_range):
+        """
+        Process a single item by filtering its observations.
+
+        :param df: DataFrame containing all data.
+        :param item_index: Current item ID to process.
+        :param beta0_range: Range for beta0.
+        :param beta1_range: Range for beta1.
+        :param beta2_range: Range for beta2.
+        :return: List of processed rows with estimated states.
+        """
+        df_item = df[df['item_id'] == item_index]
+        particles = self.initialize_particles(beta0_range, beta1_range, beta2_range)
+        filtered_data = []
+
+        for _, row in df_item.iterrows():
+            time = row['time (months)']
+            observation = row['length_measured']
+
+            particles = self.propagate_particles(particles)
+            weights = self.compute_weights(particles, observation, time)
+            particles = self.resample_particles(particles, weights)
+
+            estimated_state = np.mean(particles, axis=0)
+            estimated_crack_length = estimated_state[2] / (
+                1 + np.exp(-(estimated_state[0] + estimated_state[1] * time)))
+
+            filtered_data.append(row.tolist() + [estimated_crack_length] + estimated_state.tolist())
+
+        return filtered_data

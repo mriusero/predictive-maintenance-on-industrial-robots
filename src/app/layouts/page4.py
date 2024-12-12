@@ -1,6 +1,6 @@
 import streamlit as st
 
-from src.forecasting.main import handle_phase_two
+#from src.forecasting.main import handle_phase_two
 
 
 def page_4():
@@ -13,4 +13,4 @@ def page_4():
 
     st.image(f'models/lstm_based_crack_forecaster/model_visualization.png', caption="Model architecture", use_column_width=True)
 
-    handle_phase_two()
+ #   handle_phase_two()

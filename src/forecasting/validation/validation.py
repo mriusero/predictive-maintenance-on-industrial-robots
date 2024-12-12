@@ -1,12 +1,12 @@
 # validation.py
 import pandas as pd
+import os
 
 def generate_submission_file(model_name, submission_path, step):
 
-    template = pd.read_csv('data/output/submission/template/submission_template_phase_1.csv')
+    template = pd.read_csv('submission/template/submission_template_phase_1.csv')
     submission_df = template.copy()
     submission_df['label'] = 0
-    submission_df['predicted_rul'] = 0
 
 
     if model_name == 'lstm_based_crack_forecaster':
@@ -24,7 +24,7 @@ def generate_submission_file(model_name, submission_path, step):
 
     if model_name == 'rul_survival_predictor':
 
-        gbsa_results = pd.read_csv(f"{submission_path}/{model_name}/{model_name}_{step}.csv")
+        gbsa_results = pd.read_csv(f"{submission_path}/{model_name}_{step}.csv")
         gbsa_results['item_id'] = gbsa_results['item_id'].astype(int)
         for item_index, group in gbsa_results.groupby('item_id'):
             formatted_item_index = f"item_{item_index}"
@@ -34,4 +34,8 @@ def generate_submission_file(model_name, submission_path, step):
     else:
         raise ValueError("'model_name' not defined in 'generate_submission_file()'")
 
-    return submission_df.sort_values('item_index').to_csv(f"{submission_path}/{model_name}/submission_{step}.csv", index=False)
+    if step == 'phase-1':
+        submission_path = os.path.abspath(submission_path)
+        print('Submission file available at:', f"file://{submission_path}/submission_{step}.csv")
+
+    return submission_df.sort_values('item_index').to_csv(f"{submission_path}/submission_{step}.csv", index=False)

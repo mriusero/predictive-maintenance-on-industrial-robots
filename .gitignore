@@ -3,7 +3,7 @@ __pycache__/
 *.pyc
 *.pyo
 *.pyd
-*.pkl
+
 
 # Caches and temporary files
 .mypy_cache/
@@ -11,6 +11,7 @@ __pycache__/
 .cache/
 *.log
 *.tmp
+*error_log.json
 
 # Virtual environments
 venv/
@@ -44,3 +45,6 @@ Thumbs.db
 /data/input/training_data/pseudo_testing_data_with_truth
 /data/output/pseudo_testing
 /data/output/testing/
+
+/submission/phase_1/rul_survival_predictor*
+/submission/phase_1/submission_cross-val*

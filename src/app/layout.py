@@ -59,6 +59,7 @@ def app_layout():
             st.text("")
             if st.button('🔄'):
                 os.system('clear')
+                print("-- os system cleared --")
 
     with col2:
         st.text("")

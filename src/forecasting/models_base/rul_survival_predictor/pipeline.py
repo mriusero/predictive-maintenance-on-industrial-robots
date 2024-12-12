@@ -1,28 +1,21 @@
 import datetime
-import sys
-
-import pandas as pd
 import streamlit as st
+import numpy as np
+import tqdm as tqdm
+import pandas as pd
 
-from src.forecasting.models_base.rul_survival_predictor.configs import MODEL_NAME, SUBMISSION_FOLDER, MODEL_PATH
-from src.forecasting.validation.validation import generate_submission_file
-from .evaluation import display_results
-from .helper import SELECTED_VARIABLES, analyze
+from sklearn.metrics import classification_report
+
+from .configs import MODEL_NAME, SUBMISSION_FOLDER, MODEL_PATH, SELECTED_VARIABLES, N_VAL_SETS
+from .processing import prepare_data
+from .evaluation import measure_performance_and_plot, calculate_combined_metrics
+from .helper import analyze
 from .model import GradientBoostingSurvivalModel
 from .optimization import optimize_hyperparameters
-from .processing import prepare_data
 
+from src.forecasting.validation.validation import generate_submission_file
 
-def log_step(step_message, completed=False):
-    """Logs a single step with an optional completion message, replacing the current line."""
-
-    sys.stdout.write("\033[K") # Clear the current line
-    symbol = "✅ " if completed else "... "
-    print(f"{symbol} {step_message}", end="\r" if not completed else "\n")
-    sys.stdout.flush()
-
-
-def survival_predictor_training(train_df: pd.DataFrame, pseudo_test_with_truth_df: pd.DataFrame, optimize: bool):
+def survival_predictor_pipeline(optimize: bool):
     """
     Runs the full pipeline for training, optimizing, and evaluating the model with the validation set.
     """
@@ -30,96 +23,89 @@ def survival_predictor_training(train_df: pd.DataFrame, pseudo_test_with_truth_d
     print(" SURVIVAL PREDICTOR TRAINING")
     print("=" * 60)
 
-    # Prepare Data
-    log_step("Preparing training data...")
-    x_train, y_train = prepare_data(
-        train_df, columns_to_include=SELECTED_VARIABLES
+    print('1. Data Processing')
+    print("-" * 60)
+    data = prepare_data(
+        selected_variables=SELECTED_VARIABLES,
+        n_validation_sets=N_VAL_SETS,
+        balance_classes_flag=True
     )
-    log_step(f"Training data prepared: {len(x_train)} samples.", completed=True)
 
-    log_step("Preparing validation data...")
-    x_val, y_val = prepare_data(
-        pseudo_test_with_truth_df.drop(columns=['true_rul']),
-        reference_df=train_df,
-        columns_to_include=SELECTED_VARIABLES
-    )
-    log_step(f"Validation data prepared: {len(x_val)} samples.", completed=True)
-
-    # Initialize Model
-    log_step("Initializing the Gradient Boosting Survival Model...")
+    print('\n2. Model Training')
+    print("-" * 60)
     model = GradientBoostingSurvivalModel()
-    log_step("Model initialized.", completed=True)
-
-    # Hyperparameter Optimization
     if optimize or (model.best_params is None):
-        log_step("Optimizing hyperparameters...")
-        model.best_params = optimize_hyperparameters(x_train, y_train)
-        log_step(f"Hyperparameters optimized: {model.best_params}", completed=True)
+        model.best_params = optimize_hyperparameters(
+            data['x_train'],data['y_train'],
+            data['validation_data'],
+            percentile=0.5,
+            n_trials=100
+        )
         st.success("Hyperparameters have been optimized and saved.")
+    model.train(data['x_train'], data['y_train'])
 
-    # Train Model
-    log_step("Training the model...")
-    model.train(x_train, y_train)
-    log_step("Model training completed.", completed=True)
 
-    # Validation
-    log_step("Running predictions on the validation set...")
-    val_predictions = model.predict(x_val, columns_to_include=SELECTED_VARIABLES)
-    log_step("Validation predictions completed.", completed=True)
+    print('\n3. Cross-Validation')
+    print("-" * 60)
+    cross_val_predictions = []
+    for i in range (N_VAL_SETS):
+        x_val, y_val = data['validation_data'][f'validation_set_{i + 1}']
+        val_predictions = model.predict(x_val, columns_to_include=SELECTED_VARIABLES)
+        cross_val_predictions.append(val_predictions)
 
-    log_step("Analyzing validation results...")
-    val_predictions_merged = analyze(
-        model=model,
-        predictions=val_predictions,
-        pseudo_test_with_truth_df=pseudo_test_with_truth_df,
-        submission_path=SUBMISSION_FOLDER,
-        model_name=MODEL_NAME,
-        step='cross-val'
-    )
-    log_step("Validation results analyzed.\n", completed=True)
 
-    display_results(x_train, val_predictions_merged.sort_values(['item_id', 'time (months)'], ascending=True))
+    print('\n4. Evaluation')
+    print("-" * 60)
+    all_y_true = []
+    all_y_pred = []
+    for i in range(N_VAL_SETS):
+        val_predictions = cross_val_predictions[i]
+        val_predictions_merged = analyze(
+            model=model,
+            predictions=val_predictions,
+            pseudo_test_with_truth_df=data['truth_data'][f'validation_set_{i + 1}'],
+            submission_path=SUBMISSION_FOLDER,
+            model_name=MODEL_NAME,
+            step=f'cross-val_{i+1}'
+        )
+        val_predictions_merged = val_predictions_merged.dropna(subset=['label_y'])  # Drop NaNs of true values following class balancing to evaluate reality
 
+        y_true = val_predictions_merged['label_y'].values
+        y_pred = val_predictions_merged['predicted_failure_6_months_binary'].values
+
+        report = classification_report(y_true, y_pred, output_dict=True)
+        print(f"-- Classification Report for Validation Set {i + 1} --\n" + '_' * 45)
+        print(pd.DataFrame(report).transpose())
+        print("\n")
+
+        all_y_true.append(y_true)
+        all_y_pred.append(y_pred)
+
+    all_y_true = np.concatenate(all_y_true)
+    all_y_pred = np.concatenate(all_y_pred)
+
+    measure_performance_and_plot(all_y_true, all_y_pred)
+
+
+    print('\n5. Model Saving')
+    print("-" * 60)
     # Save Model
     timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
     model_path_with_timestamp = f"{MODEL_PATH.rsplit('.', 1)[0]}_{timestamp}.pkl"
     try:
         model.save_model(path=model_path_with_timestamp)
-        log_step(f"Model saved successfully at {model_path_with_timestamp}", completed=True)
-        st.success(f"Model saved successfully at {model_path_with_timestamp}")
+        print(f"Model saved successfully at {model_path_with_timestamp}")
+        st.toast(f"Model saved successfully at {model_path_with_timestamp}")
     except Exception as e:
-        log_step(f"Failed to save model: {e}", completed=True)
         st.error(f"Failed to save model: {e}")
 
 
-def survival_predictor_prediction(train_df: pd.DataFrame, test_df: pd.DataFrame):
-    """
-    Runs the full pipeline for evaluating the model with the test set.
-    """
-    print("\n" + "=" * 60)
-    print(" SURVIVAL PREDICTOR PREDICTION")
-    print("=" * 60)
-
-    # Data Preparation
-    log_step("Preparing test data...")
-    x_test, _ = prepare_data(
-        test_df,
-        reference_df=train_df,
-        columns_to_include=SELECTED_VARIABLES
-    )
-    log_step(f"Test data prepared: {len(x_test)} samples.", completed=True)
-
-    # Load Model
+    print('\n6. Final test set prediction')
+    print("-" * 60)
     model = GradientBoostingSurvivalModel.load_model(path=f'models/rul_survival_predictor/rul_survival_predictor_model.pkl')
-    log_step(f"Model {MODEL_NAME} logged successfully.", completed=True)
+    step = 'phase-1'
+    test_predictions = model.predict(data['x_test'], columns_to_include=SELECTED_VARIABLES)
 
-    # Prediction on Test Set
-    step = 'final-test'
-    log_step("Running predictions on the test set...")
-    test_predictions = model.predict(x_test, columns_to_include=SELECTED_VARIABLES)
-    log_step("Test predictions completed.", completed=True)
-
-    log_step("Calculating deducted RUL...")
     test_predictions['deducted_rul'] = (
         test_predictions
         .groupby('item_id', group_keys=False)
@@ -128,17 +114,8 @@ def survival_predictor_prediction(train_df: pd.DataFrame, test_df: pd.DataFrame)
         .astype(int)
         .reset_index(drop=True)
     )
-    log_step("Deducted RUL calculations completed.", completed=True)
 
-    # Save Predictions
-    log_step("Saving predictions...")
+    print('\n7. Submission')
+    print("-" * 60)
     model.save_predictions(model_name=MODEL_NAME, submission_path=SUBMISSION_FOLDER, step=step, predictions_df=test_predictions)
-    log_step("Predictions saved successfully.", completed=True)
-
-    # Generate Submission File
-    log_step("Generating submission file...")
     generate_submission_file(model_name=MODEL_NAME, submission_path=SUBMISSION_FOLDER, step=step)
-    log_step("Submission file generated successfully.", completed=True)
-
-    # Calculate Final Score
-    log_step("Calculating final score...")

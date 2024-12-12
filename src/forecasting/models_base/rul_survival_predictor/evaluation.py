@@ -6,20 +6,46 @@ from sklearn.metrics import (
     roc_curve, auc, precision_recall_curve
 )
 
+from sklearn.metrics import precision_score, recall_score, f1_score, accuracy_score
 
-def measure_performance_and_plot(predictions_df: pd.DataFrame):
+
+def calculate_combined_metrics(all_y_true, all_y_pred):
+    """
+    Calculates combined metrics from all true labels and predictions.
+    Args:
+        all_y_true (np.ndarray): Array of combined true labels.
+        all_y_pred (np.ndarray): Array of combined predictions.
+    Returns:
+        dict: Dictionary containing the global metrics.
+    """
+    metrics = {
+        'precision_weighted': precision_score(all_y_true, all_y_pred, average='weighted', zero_division=1),
+        'recall_weighted': recall_score(all_y_true, all_y_pred, average='weighted', zero_division=1),
+        'f1_weighted': f1_score(all_y_true, all_y_pred, average='weighted', zero_division=1),
+        'accuracy': accuracy_score(all_y_true, all_y_pred),
+        'precision_macro': precision_score(all_y_true, all_y_pred, average='macro', zero_division=1),
+        'recall_macro': recall_score(all_y_true, all_y_pred, average='macro', zero_division=1),
+        'f1_macro': f1_score(all_y_true, all_y_pred, average='macro', zero_division=1),
+    }
+    return metrics
+
+
+def measure_performance_and_plot(true_labels, predicted_labels):
     """
     Measures model performance and plots relevant metrics.
     """
-    true_labels = predictions_df['label_y']
-    predicted_labels = predictions_df['predicted_failure_6_months_binary']
-
     # Classification Report
     report = classification_report(true_labels, predicted_labels, output_dict=True)
-    st.write("Classification Report:")
+    print(f"-- Global Classification Report --\n" + '_' * 45)
     st.dataframe(pd.DataFrame(report).transpose())
     print(pd.DataFrame(report).transpose())
     print("\n")
+
+    # Combined Metrics
+    combined_metrics = calculate_combined_metrics(true_labels, predicted_labels)
+    print("\n-- Global Metrics --\n" + '_' * 45)
+    for metric_name, value in combined_metrics.items():
+        print(f"- {metric_name}: {value:.4f}")
 
     col1, col2, col3 = st.columns(3)
 
@@ -33,7 +59,7 @@ def measure_performance_and_plot(predictions_df: pd.DataFrame):
 
     with col2:
         # ROC Curve
-        fpr, tpr, _ = roc_curve(true_labels, predictions_df['predicted_failure_6_months'])
+        fpr, tpr, _ = roc_curve(true_labels, predicted_labels)
         roc_auc = auc(fpr, tpr)
         plt.figure()
         plt.plot(fpr, tpr, color='darkorange', lw=2, label=f'ROC curve (area = {roc_auc:.2f})')
@@ -48,7 +74,7 @@ def measure_performance_and_plot(predictions_df: pd.DataFrame):
 
     with col3:
         # Precision-Recall Curve
-        precision, recall, _ = precision_recall_curve(true_labels, predictions_df['predicted_failure_6_months'])
+        precision, recall, _ = precision_recall_curve(true_labels, predicted_labels)
         plt.figure()
         plt.plot(recall, precision, color='b', lw=2)
         plt.xlabel('Recall')
@@ -56,13 +82,3 @@ def measure_performance_and_plot(predictions_df: pd.DataFrame):
         plt.title('Precision-Recall Curve')
         st.pyplot(plt)
 
-
-def display_results(x_train, predictions_df):
-    """
-    Displays results in Streamlit.
-    """
-    col1, col2 = st.columns(2)
-    with col1:
-        st.write(x_train.columns.to_list())
-
-    measure_performance_and_plot(predictions_df)

@@ -1,0 +1,40 @@
+{
+    "study_name": "rul_survival_predictor_hyperparameter_optimization",
+    "direction": 2,
+    "best_trial": {
+        "n_estimators": 111,
+        "learning_rate": 0.004118140357547766,
+        "max_depth": 10,
+        "subsample": 0.6173201295246374,
+        "min_samples_split": 9,
+        "min_samples_leaf": 19
+    },
+    "all_trials": [
+        {
+            "trial_number": 0,
+            "params": {
+                "n_estimators": 111,
+                "learning_rate": 0.004118140357547766,
+                "max_depth": 10,
+                "subsample": 0.6173201295246374,
+                "min_samples_split": 9,
+                "min_samples_leaf": 19
+            },
+            "value": 0.5,
+            "state": 1
+        },
+        {
+            "trial_number": 1,
+            "params": {
+                "n_estimators": 268,
+                "learning_rate": 0.0046726315816523496,
+                "max_depth": 5,
+                "subsample": 0.8035416854219646,
+                "min_samples_split": 11,
+                "min_samples_leaf": 3
+            },
+            "value": 0.5,
+            "state": 1
+        }
+    ]
+}

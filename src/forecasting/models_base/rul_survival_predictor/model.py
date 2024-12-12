@@ -1,7 +1,7 @@
 import os
 import pickle
 from typing import List, Optional
-
+from tqdm import tqdm
 import numpy as np
 import pandas as pd
 from sksurv.ensemble import GradientBoostingSurvivalAnalysis
@@ -14,7 +14,6 @@ class GradientBoostingSurvivalModel:
         self.model = None
         self.best_params = load_hyperparameters()
 
-
     def train(self, x_train, y_train):
         """
         Trains the gradient boosting survival model.
@@ -26,7 +25,12 @@ class GradientBoostingSurvivalModel:
                 'subsample': 1.0, 'min_samples_split': 2, 'min_samples_leaf': 1
             }
         self.model = GradientBoostingSurvivalAnalysis(**self.best_params)
-        self.model.fit(x_train, y_train)
+
+        with tqdm(total=self.best_params['n_estimators'], desc="Training", unit="iteration") as pbar:
+            def update_bar(estimator_idx, *_):
+                pbar.update(1)
+
+            self.model.fit(x_train, y_train, monitor=update_bar)
 
 
     def predict(
@@ -48,7 +52,7 @@ class GradientBoostingSurvivalModel:
         predictions_df['predicted_failure_now'] = np.nan
         predictions_df['predicted_failure_6_months'] = np.nan
 
-        for idx, surv_func in enumerate(surv_funcs):
+        for idx, surv_func in tqdm(enumerate(surv_funcs), total=len(surv_funcs), desc="Survival prediction", unit="seq"):
             time_now = X_test.loc[idx, 'time (months)']
             survival_prob_now = surv_func(time_now) if time_now <= surv_func.x[-1] else 1.0
             survival_prob_6_months = surv_func(time_now + 6) if time_now + 6 <= surv_func.x[-1] else 1.0
@@ -56,11 +60,12 @@ class GradientBoostingSurvivalModel:
             predictions_df.at[idx, 'predicted_failure_now'] = 1 - survival_prob_now
             predictions_df.at[idx, 'predicted_failure_6_months'] = 1 - survival_prob_6_months
 
-        predictions_df['predicted_failure_now_binary'] = (predictions_df['predicted_failure_now'] >= threshold).astype(
-            int)
+        predictions_df['predicted_failure_now_binary'] = (
+            (predictions_df['predicted_failure_now'] >= threshold).astype(int)
+        )
         predictions_df['predicted_failure_6_months_binary'] = (
-                    predictions_df['predicted_failure_6_months'] >= threshold).astype(int)
-
+            (predictions_df['predicted_failure_6_months'] >= threshold).astype(int)
+        )
         return predictions_df
 
 
@@ -83,7 +88,7 @@ class GradientBoostingSurvivalModel:
         """
         Saves predictions to a CSV file with 'item_id' included.
         """
-        file_path = f"{submission_path}/{model_name}/{model_name}_{step}.csv"
+        file_path = f"{submission_path}/{model_name}_{step}.csv"
         predictions_df.to_csv(file_path, index=False)
 
 
