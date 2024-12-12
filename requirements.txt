@@ -15,6 +15,8 @@ seaborn==0.13.2
 
 # Statistics
 statsmodels==0.14.2
+imblearn~=0.0
+imbalanced-learn~=0.12.4
 
 # Machine Learning
 scikit-learn==1.5.1
@@ -27,5 +29,4 @@ filterpy==1.4.5
 tensorflow==2.16.2
 visualkeras==0.1.4
 pydot==3.0.3
-
 keras~=3.7.0
