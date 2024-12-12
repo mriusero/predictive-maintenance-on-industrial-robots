@@ -8,9 +8,9 @@ from .evaluation import display_results
 from .helper import SELECTED_VARIABLES, analyze
 from .model import GradientBoostingSurvivalModel
 from .optimization import optimize_hyperparameters
-from .processing import prepare_train_data, prepare_validation_sets
+from .processing import prepare_data
 
-def survival_predictor_training(train_df: pd.DataFrame, pseudo_test_with_truth_df: pd.DataFrame, optimize: bool):
+def survival_predictor_pipeline(optimize: bool):
     """
     Runs the full pipeline for training, optimizing, and evaluating the model with the validation set.
     """
@@ -18,41 +18,27 @@ def survival_predictor_training(train_df: pd.DataFrame, pseudo_test_with_truth_d
     print(" SURVIVAL PREDICTOR TRAINING")
     print("=" * 60)
 
-    print('1. Processing Data')
+    print('1. Data Processing')
     print("-" * 60)
-    # Prepare Training Data
-    x_train, y_train = prepare_train_data(
-        train_df, columns_to_include=SELECTED_VARIABLES
+    data = prepare_data(
+        selected_variables=SELECTED_VARIABLES,
+        n_validation_sets=10
     )
-    print(f"training_set: x_train shape {x_train.shape}, y_train shape {y_train.shape}")
 
-    # Prepare Validation Data
-    validation_data = prepare_validation_sets(
-        n_sets=10,
-        reference_df=train_df,
-        columns_to_include=SELECTED_VARIABLES
-    )
-    for key, (x_val, y_val) in validation_data.items():
-        print(f"{key}: x_val shape {x_val.shape}, y_val shape {y_val.shape}")
-
-    # Prepare Testing Data
-    #x_test, _ = prepare_train_data(
-    #    test_df,
-    #    columns_to_include=SELECTED_VARIABLES
-    #)
-
-
-    # Initialize Model
+    print('2. Model Training')
+    print("-" * 60)
     model = GradientBoostingSurvivalModel()
 
     # Hyperparameter Optimization
     if optimize or (model.best_params is None):
-        model.best_params = optimize_hyperparameters(x_train, y_train)
+        model.best_params = optimize_hyperparameters(data['x_train'],data['y_train'])
         st.success("Hyperparameters have been optimized and saved.")
 
     # Train Model
-    model.train(x_train, y_train)
+    model.train(data['x_train'], data['y_train'])
 
+    print('3. Cross-Validation')
+    print("-" * 60)
     # Validation
     val_predictions = model.predict(x_val, columns_to_include=SELECTED_VARIABLES)
 
@@ -76,20 +62,6 @@ def survival_predictor_training(train_df: pd.DataFrame, pseudo_test_with_truth_d
     except Exception as e:
         st.error(f"Failed to save model: {e}")
 
-def survival_predictor_prediction(train_df: pd.DataFrame, test_df: pd.DataFrame):
-    """
-    Runs the full pipeline for evaluating the model with the test set.
-    """
-    print("\n" + "=" * 60)
-    print(" SURVIVAL PREDICTOR PREDICTION")
-    print("=" * 60)
-
-    # Data Preparation
-    x_test, _ = prepare_data(
-        test_df,
-        reference_df=train_df,
-        columns_to_include=SELECTED_VARIABLES
-    )
 
     # Load Model
     model = GradientBoostingSurvivalModel.load_model(path=f'models/rul_survival_predictor/rul_survival_predictor_model.pkl')
