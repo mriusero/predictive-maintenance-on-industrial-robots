@@ -1,3 +1,4 @@
+import streamlit as st
 from typing import Optional, List, Tuple, Dict
 import os
 import re
@@ -106,7 +107,18 @@ def generate_n_validation_sets(n_validation_sets: int) -> Dict[str, pd.DataFrame
                     dfs.append(df)
 
         combined_df = pd.concat(dfs, ignore_index=True)
-        validation_data[f'validation_set_{i + 1}'] = process_data(combined_df)
+
+        # Load solution data
+        solution_data_path = './data/input/training_data/pseudo_testing_data_with_truth/Solution.csv'
+        solution_data = pd.read_csv(solution_data_path)
+
+        # Merge combined df with solution data
+        df = combined_df.copy()
+        solution_data['item_id'] = solution_data['item_id'].str.extract(r'(\d+)').astype(int)
+        df = pd.merge(df, solution_data, on='item_id', how='left')
+        df['item_id'] = df['item_id'].astype(int)
+
+        validation_data[f'validation_set_{i + 1}'] = process_data(df)
 
     return validation_data
 
@@ -126,22 +138,32 @@ def prepare_validation_sets(
         Dict[str, Tuple[pd.DataFrame, np.ndarray]]: Dictionary of validation sets with features and survival objects.
     """
     validation_data = {}
+    truth_data = {}
     generated_data = generate_n_validation_sets(n_sets)
 
     for key, df in generated_data.items():
-        df.drop(columns=['true_rul'], inplace=True, errors='ignore')
         df = df.sort_values(by=['item_id', 'time (months)']).reset_index(drop=True)
 
+        # Check if 'true_rul' column exists and copy the dataframe to truth_data if so
+        if 'true_rul' in df.columns:
+            truth_data[key] = df.copy()  # Save the dataframe with 'true_rul' for evaluation
+
+        # Remove the 'true_rul' column from df if it exists
+        df.drop(columns=['true_rul'], inplace=True, errors='ignore')
+
+        # Align columns with reference_df if it's provided
         if reference_df is not None:
             df = df.reindex(columns=reference_df.columns, fill_value=0)
 
+        # Preprocess other columns
         df['label'] = df['label'].astype(bool)
         df['time (months)'] = pd.to_numeric(df['time (months)'], errors='coerce')
         df.dropna(subset=['time (months)', 'label'], inplace=True)
 
+        # Generate survival data for validation
         validation_data[key] = create_survival_data(df, columns_to_include)
 
-    return validation_data
+    return validation_data, truth_data
 
 
 def prepare_data(selected_variables: List[str], n_validation_sets: int = 10) -> Dict[str, object]:
@@ -164,7 +186,7 @@ def prepare_data(selected_variables: List[str], n_validation_sets: int = 10) -> 
     print(f"training_set: x_train shape {x_train.shape}, y_train shape {y_train.shape}")
 
     # Prepare validation data
-    validation_data = prepare_validation_sets(
+    validation_data, truth_data = prepare_validation_sets(
         n_sets=n_validation_sets,
         reference_df=train_df,
         columns_to_include=selected_variables
@@ -182,5 +204,6 @@ def prepare_data(selected_variables: List[str], n_validation_sets: int = 10) -> 
         "x_train": x_train,
         "y_train": y_train,
         "validation_data": validation_data,
+        "truth_data": truth_data,
         "x_test": x_test
     }

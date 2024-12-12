@@ -2,7 +2,8 @@ MODEL_NAME = 'rul_survival_predictor'
 MODEL_FOLDER = 'models/' + MODEL_NAME + '/'
 MODEL_PATH = MODEL_FOLDER + MODEL_NAME + '_model.pkl'
 HYPERPARAMETERS_PATH = MODEL_FOLDER + MODEL_NAME + '_best_params.pkl'
-SUBMISSION_FOLDER = 'data/output/submission'
+SUBMISSION_FOLDER = 'submission/phase_1/'
+N_VAL_SETS = 10
 
 SELECTED_VARIABLES = ["source", "item_id", "time (months)", "label",                    # "length_measured",
                       "Infant mortality", "Control board failure", "Fatigue crack",     # "Failure mode"

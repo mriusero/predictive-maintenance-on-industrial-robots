@@ -1,14 +1,15 @@
 import datetime
-import pandas as pd
 import streamlit as st
+import tqdm as tqdm
 
-from src.forecasting.models_base.rul_survival_predictor.configs import MODEL_NAME, SUBMISSION_FOLDER, MODEL_PATH
-from src.forecasting.validation.validation import generate_submission_file
+from .configs import MODEL_NAME, SUBMISSION_FOLDER, MODEL_PATH, SELECTED_VARIABLES, N_VAL_SETS
+from .processing import prepare_data
 from .evaluation import display_results
-from .helper import SELECTED_VARIABLES, analyze
+from .helper import analyze
 from .model import GradientBoostingSurvivalModel
 from .optimization import optimize_hyperparameters
-from .processing import prepare_data
+
+from src.forecasting.validation.validation import generate_submission_file
 
 def survival_predictor_pipeline(optimize: bool):
     """
@@ -22,53 +23,61 @@ def survival_predictor_pipeline(optimize: bool):
     print("-" * 60)
     data = prepare_data(
         selected_variables=SELECTED_VARIABLES,
-        n_validation_sets=10
+        n_validation_sets=N_VAL_SETS
     )
 
-    print('2. Model Training')
+    print('\n2. Model Training')
     print("-" * 60)
     model = GradientBoostingSurvivalModel()
-
-    # Hyperparameter Optimization
     if optimize or (model.best_params is None):
         model.best_params = optimize_hyperparameters(data['x_train'],data['y_train'])
         st.success("Hyperparameters have been optimized and saved.")
-
-    # Train Model
     model.train(data['x_train'], data['y_train'])
 
-    print('3. Cross-Validation')
+
+    print('\n3. Cross-Validation')
     print("-" * 60)
-    # Validation
-    val_predictions = model.predict(x_val, columns_to_include=SELECTED_VARIABLES)
+    cross_val_predictions = []
+    for i in range (N_VAL_SETS):
+        x_val, y_val = data['validation_data'][f'validation_set_{i + 1}']
+        val_predictions = model.predict(x_val, columns_to_include=SELECTED_VARIABLES)
+        cross_val_predictions.append(val_predictions)
 
-    val_predictions_merged = analyze(
-        model=model,
-        predictions=val_predictions,
-        pseudo_test_with_truth_df=pseudo_test_with_truth_df,
-        submission_path=SUBMISSION_FOLDER,
-        model_name=MODEL_NAME,
-        step='cross-val'
-    )
 
-    display_results(x_train, val_predictions_merged.sort_values(['item_id', 'time (months)'], ascending=True))
+    print('\n4. Evaluation')
+    print("-" * 60)
+    for i in range(N_VAL_SETS):
+        val_predictions = cross_val_predictions[i]
+        val_predictions_merged = analyze(
+            model=model,
+            predictions=val_predictions,
+            pseudo_test_with_truth_df=data['truth_data'][f'validation_set_{i + 1}'],
+            submission_path=SUBMISSION_FOLDER,
+            model_name=MODEL_NAME,
+            step=f'cross-val_{i+1}'
+        )
+        print(f"\n-- Validation Set {i + 1} --")
+        display_results(data['x_train'], val_predictions_merged.sort_values(['item_id', 'time (months)'], ascending=True))
 
+
+    print('\n5. Model Saving')
+    print("-" * 60)
     # Save Model
     timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
     model_path_with_timestamp = f"{MODEL_PATH.rsplit('.', 1)[0]}_{timestamp}.pkl"
     try:
         model.save_model(path=model_path_with_timestamp)
-        st.success(f"Model saved successfully at {model_path_with_timestamp}")
+        print(f"Model saved successfully at {model_path_with_timestamp}")
+        st.toast(f"Model saved successfully at {model_path_with_timestamp}")
     except Exception as e:
         st.error(f"Failed to save model: {e}")
 
 
-    # Load Model
+    print('\n6. Final test set prediction')
+    print("-" * 60)
     model = GradientBoostingSurvivalModel.load_model(path=f'models/rul_survival_predictor/rul_survival_predictor_model.pkl')
-
-    # Prediction on Test Set
-    step = 'final-test'
-    test_predictions = model.predict(x_test, columns_to_include=SELECTED_VARIABLES)
+    step = 'phase-1'
+    test_predictions = model.predict(data['x_test'], columns_to_include=SELECTED_VARIABLES)
 
     test_predictions['deducted_rul'] = (
         test_predictions
@@ -79,8 +88,7 @@ def survival_predictor_pipeline(optimize: bool):
         .reset_index(drop=True)
     )
 
-    # Save Predictions
+    print('\n7. Submission')
+    print("-" * 60)
     model.save_predictions(model_name=MODEL_NAME, submission_path=SUBMISSION_FOLDER, step=step, predictions_df=test_predictions)
-
-    # Generate Submission File
     generate_submission_file(model_name=MODEL_NAME, submission_path=SUBMISSION_FOLDER, step=step)

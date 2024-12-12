@@ -1,6 +1,7 @@
 # Streamlit app
 streamlit==1.37.1
 watchdog==4.0.1
+tqdm~=4.67.1
 
 # Data transformation
 numpy==1.26.4
@@ -26,3 +27,5 @@ filterpy==1.4.5
 tensorflow==2.16.2
 visualkeras==0.1.4
 pydot==3.0.3
+
+keras~=3.7.0
